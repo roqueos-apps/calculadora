@@ -1,0 +1,42 @@
+{
+  "id": "calculator",
+  "versaoDoContrato": 1,
+  "camada": "primeira-parte",
+  "nome": {
+    "pt-BR": "Calculadora",
+    "en-US": "Calculator",
+    "es-ES": "Calculadora",
+    "fr-FR": "Calculatrice",
+    "de-DE": "Rechner",
+    "ja-JP": "計算機",
+    "zh-CN": "计算器",
+    "hi-IN": "कैलकुलेटर",
+    "ru-RU": "Калькулятор",
+    "ar-AR": "الآلة الحاسبة"
+  },
+  "descricao": {
+    "pt-BR": "Calculadora científica",
+    "en-US": "Scientific Calculator",
+    "es-ES": "Calculadora científica",
+    "fr-FR": "Calculatrice scientifique",
+    "de-DE": "Wissenschaftlicher Taschenrechner",
+    "ja-JP": "関数電卓",
+    "zh-CN": "科学计算器",
+    "hi-IN": "वैज्ञानिक कैलकुलेटर",
+    "ru-RU": "Инженерный калькулятор",
+    "ar-AR": "آلة حاسبة علمية"
+  },
+  "icone": "calculate",
+  "cor": "#ff9500",
+  "categoria": "productivity",
+  "janela": {
+    "largura": 380,
+    "altura": 680,
+    "minLargura": 300,
+    "minAltura": 540,
+    "maximizavel": false
+  },
+  "capacidades": [],
+  "autor": "Roque Ribeiro",
+  "licenca": "MIT"
+}

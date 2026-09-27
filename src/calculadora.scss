@@ -1,0 +1,758 @@
+// O visual da Calculadora: uma calculadora científica de mesa, com o reflexo que segue o
+// sensor (ou o ponteiro) pelas variáveis --tilt-x e --tilt-y.
+//
+// As cores são do app, em variáveis --calc-*: o prefixo --ros- é do sistema, e o `app check`
+// reprova o app que declara uma delas. Do tema do RoqueOS vêm só as três do contrato
+// (`VARIAVEIS_DO_SISTEMA` do app-sdk): --ros-white-rgb, --ros-black-rgb e --ros-border-dim.
+
+.ros-calc {
+  // Cores de identidade deste app. Ficam aqui, e não em `tokens-root.scss`,
+  // porque são do app e não do sistema — mas ficam como custom property
+  // para que um tema consiga alcançá-las.
+  --calc-bg-1: rgba(255, 244, 220, 0.05);
+  --calc-bg-2: #2a2e34;
+  --calc-bg-3: #1b1d22;
+  --calc-bg-4: #141519;
+  --calc-shadow-1: rgba(255, 255, 255, 0.14);
+  --calc-shadow-2: rgba(0, 0, 0, 0.45);
+  --calc-shadow-3: rgba(0, 0, 0, 0.5);
+  --calc-shadow-4: rgba(0, 0, 0, 0.6);
+  --calc-bg-5: #1c1f24;
+  --calc-bg-6: #131519;
+  --calc-shadow-5: rgba(18, 11, 4, 0.42);
+  --calc-bg-7: rgba(255, 255, 255, 0.045);
+  --calc-bg-8: rgba(255, 255, 255, 0.16);
+  --calc-bg-9: rgba(0, 0, 0, 0.22);
+  --calc-fg-1: #e9eaed;
+  --calc-fg-2: #8b9099;
+  --calc-bg-10: #3b4a5e;
+  --calc-bg-11: #1c2733;
+  --calc-shadow-6: rgba(120, 160, 200, 0.35);
+  --calc-fg-3: #cfd2d7;
+  --calc-bg-12: #3f434b;
+  --calc-bg-13: #2c2f35;
+  --calc-shadow-7: rgba(255, 255, 255, 0.08);
+  --calc-shadow-8: rgba(0, 0, 0, 0.35);
+  --calc-shadow-9: rgba(255, 255, 255, 0.25);
+  --calc-shadow-10: rgba(0, 0, 0, 0.3);
+  --calc-shadow-11: rgba(255, 255, 255, 0.06);
+  --calc-shadow-12: rgba(255, 255, 255, 0.2);
+  --calc-shadow-13: rgba(255, 255, 255, 0.34);
+  --calc-shadow-14: rgba(0, 0, 0, 0.4);
+  --calc-bg-14: rgba(31, 38, 22, 0.05);
+  --calc-bg-15: rgba(255, 255, 255, 0.18);
+  --calc-bg-16: rgba(255, 255, 255, 0);
+  --calc-bg-17: rgba(255, 255, 255, 0.1);
+  --calc-bg-18: rgba(255, 255, 255, 0.28);
+  --calc-shadow-15: rgba(255, 255, 255, 0.7);
+  --calc-shadow-16: rgba(0, 0, 0, 0.06);
+  --calc-shadow-17: #b9b5ac;
+  --calc-bg-19: rgba(255, 255, 255, 0.55);
+  --calc-shadow-18: rgba(255, 255, 255, 0.5);
+  --calc-shadow-19: rgba(0, 0, 0, 0.18);
+  --calc-shadow-20: rgba(0, 0, 0, 0.25);
+  --calc-shadow-21: #16181c;
+  --calc-bg-20: rgba(255, 255, 255, 0.02);
+  --calc-shadow-22: rgba(255, 255, 255, 0.45);
+  --calc-shadow-23: rgba(0, 0, 0, 0.12);
+  --calc-shadow-24: rgba(120, 70, 0, 0.3);
+  --calc-shadow-25: rgba(255, 255, 255, 0.35);
+  --calc-shadow-26: rgba(120, 70, 0, 0.25);
+  --calc-shadow-27: rgba(255, 255, 255, 0.4);
+  --calc-shadow-28: rgba(0, 0, 0, 0.14);
+  --calc-shadow-29: rgba(120, 60, 0, 0.35);
+  --calc-bg-21: rgba(20, 18, 14, 0.45);
+  --calc-bg-22: #f4f2ec;
+  --calc-bg-23: #e7e4db;
+  --calc-fg-4: #4a4d52;
+  --calc-fg-5: #9a6a2a;
+  --calc-fg-6: #9c988e;
+  --calc-fg-7: #8a8681;
+  --calc-fg-8: #2a2d31;
+  --calc-bg-24: rgba(20, 18, 14, 0);
+  --calc-shadow-30: rgba(0, 0, 0, 0.2);
+}
+.ros-calc {
+  --body-1: #3a3d44;
+  --body-2: #262a30;
+  --lcd-1: #c7cfb4;
+  --lcd-2: #b4bda0;
+  --lcd-3: #a7b193;
+  --lcd-ink: #1f2616;
+  --lcd-ink-soft: #566049;
+  --num-1: #f4f3f0;
+  --num-2: #e0ddd6;
+  --num-ink: #26282c;
+  --fn-1: #474b53;
+  --fn-2: #363a41;
+  --fn-ink: #eceef1;
+  --accent-text: oklch(0.78 0.12 72);
+  --op-1: oklch(0.82 0.12 74);
+  --op-2: oklch(0.75 0.135 68);
+  --op-ink: #3a2606;
+  --eq-1: oklch(0.78 0.145 66);
+  --eq-2: oklch(0.7 0.155 58);
+  --del-text: oklch(0.7 0.13 32);
+
+  // O app não herda o CSS global do RoqueOS (o `box-sizing: border-box` do Quasar
+  // incluído): sem isto, o padding soma à largura de 100% e a carcaça sai cortada nas
+  // bordas quando a Calculadora roda fora do RoqueOS (medido no `yarn dev`, 27/09/2026).
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(8px, 1.6%, 14px);
+  padding: clamp(8px, 2.5%, 18px);
+  // Clear the iPhone home indicator at the bottom; the "powered by" footer
+  // lives in this safe-area space. Always var(...,env(...)), never bare env().
+  padding-bottom: calc(
+    clamp(8px, 2.5%, 18px) + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px))
+  );
+  overflow: hidden;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  font-family: 'Helvetica Neue', Helvetica, Arial, system-ui, sans-serif;
+  // Warm desk backdrop so the moulded device reads as a physical object.
+  background: radial-gradient(120% 80% at 50% -10%, var(--calc-bg-1), transparent 55%),
+    linear-gradient(160deg, var(--calc-bg-2) 0%, var(--calc-bg-3) 60%, var(--calc-bg-4) 100%);
+}
+
+// ---------------- footer (brand stamp, sits in the safe-area space) ----------
+.ros-calc__footer {
+  flex-shrink: 0;
+  font-family: 'SF Mono', 'JetBrains Mono', 'Roboto Mono', ui-monospace, monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(var(--ros-white-rgb), 0.32);
+  text-align: center;
+}
+.ros-calc__brandmark {
+  color: rgba(var(--ros-white-rgb), 0.62);
+  font-weight: 700;
+  letter-spacing: 0.24em;
+}
+
+// ---------------- device ----------------
+.ros-calc__device {
+  container-type: inline-size;
+  position: relative;
+  width: 100%;
+  max-width: 460px;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(10px, 2.6cqw, 16px);
+  padding: clamp(12px, 3.4cqw, 20px);
+  border-radius: clamp(20px, 6cqw, 30px);
+  background: linear-gradient(150deg, var(--body-1), var(--body-2) 70%);
+  box-shadow:
+    0 1px 0 var(--calc-shadow-1) inset,
+    0 -1px 5px var(--calc-shadow-2) inset,
+    0 2px 3px var(--calc-shadow-3),
+    0 18px 50px -16px var(--calc-shadow-4);
+}
+.ros-calc__base {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 8px;
+  bottom: -14px;
+  border-radius: inherit;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    var(--calc-bg-2) 0%,
+    var(--calc-bg-5) 55%,
+    var(--calc-bg-6) 100%
+  );
+  box-shadow: 0 2px 0 var(--calc-shadow-5);
+}
+.ros-calc__device::before {
+  // moulded-plastic light sweep
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 4;
+  background: linear-gradient(
+      122deg,
+      var(--calc-shadow-1) 0%,
+      var(--calc-bg-7) 11%,
+      transparent 28%
+    ),
+    radial-gradient(130% 70% at 8% -10%, var(--calc-bg-8), transparent 40%),
+    radial-gradient(120% 90% at 108% 112%, var(--calc-bg-9), transparent 46%);
+  mix-blend-mode: screen;
+  // The body's light sweep drifts with device tilt / pointer (useDeviceTilt),
+  // so the moulded plastic reads as catching real light. translate3d keeps it
+  // on the compositor; var defaults to 0 → identical static look when inert.
+  transform: translate3d(calc(var(--tilt-x, 0) * 7px), calc(var(--tilt-y, 0) * 6px), 0);
+  will-change: transform;
+}
+.ros-calc__device::after {
+  // Fine matte grain so the moulded shell reads as real textured plastic.
+  // Inline grayscale fractal-noise SVG (no asset), tiled, overlay-blended very
+  // low. Static layer below the light sweep (z4) and content (z5), above the
+  // body gradient — light + keys sit on top of the texture.
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+  mix-blend-mode: overlay;
+  opacity: 0.16;
+}
+
+// ---------------- top bar ----------------
+.ros-calc__top {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 2px 4px 0;
+  position: relative;
+  z-index: 5;
+}
+.ros-calc__brand {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  line-height: 1;
+}
+.ros-calc__brand-name {
+  font-family: 'SF Mono', 'JetBrains Mono', 'Roboto Mono', ui-monospace, monospace;
+  font-weight: 700;
+  font-size: clamp(14px, 4cqw, 18px);
+  letter-spacing: 0.32em;
+  color: var(--calc-fg-1);
+  text-shadow: 0 1px 0 var(--ros-shadow-50);
+}
+.ros-calc__brand-model {
+  font-family: 'SF Mono', 'JetBrains Mono', 'Roboto Mono', ui-monospace, monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.18em;
+  color: var(--calc-fg-2);
+  text-transform: uppercase;
+}
+.ros-calc__solar {
+  display: flex;
+  gap: 3px;
+  margin-top: 6px;
+}
+.ros-calc__solar span {
+  width: 14px;
+  height: 9px;
+  border-radius: 1.5px;
+  background: linear-gradient(135deg, var(--calc-bg-10), var(--calc-bg-11) 60%);
+  box-shadow:
+    inset 0 1px 1px var(--calc-shadow-6),
+    inset 0 -1px 1px var(--calc-shadow-4);
+}
+.ros-calc__chips {
+  display: flex;
+  gap: 8px;
+}
+.ros-calc__chip {
+  font-family: 'SF Mono', 'JetBrains Mono', 'Roboto Mono', ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: var(--calc-fg-3);
+  background: linear-gradient(180deg, var(--calc-bg-12), var(--calc-bg-13));
+  border: 1px solid var(--ros-border-dim);
+  border-radius: 999px;
+  padding: 7px 13px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  box-shadow:
+    0 1px 0 var(--calc-shadow-7) inset,
+    0 2px 4px var(--calc-shadow-8);
+  transition: all 0.15s;
+
+  &:hover {
+    color: var(--ros-text-100);
+  }
+  &.is-on {
+    color: var(--op-ink);
+    background: linear-gradient(180deg, var(--op-1), var(--op-2));
+    box-shadow:
+      0 1px 0 var(--calc-shadow-9) inset,
+      0 2px 6px var(--calc-shadow-10);
+  }
+}
+// O ícone do histórico, no tamanho que o q-icon tinha (16px) e na cor do chip.
+.ros-calc__chip-icon {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+// ---------------- LCD ----------------
+.ros-calc__lcd {
+  position: relative;
+  flex-shrink: 0;
+  border-radius: 14px;
+  padding: clamp(12px, 3.4cqw, 18px) clamp(14px, 4cqw, 20px);
+  background: linear-gradient(180deg, var(--lcd-1), var(--lcd-2) 60%, var(--lcd-3));
+  overflow: hidden;
+  font-family: 'SF Mono', 'JetBrains Mono', 'Roboto Mono', 'Chivo Mono', ui-monospace, monospace;
+  box-shadow:
+    0 2px 3px var(--calc-shadow-11),
+    0 -1px 0 var(--calc-shadow-12) inset,
+    0 0 0 1.5px var(--calc-shadow-13) inset,
+    0 3px 10px var(--calc-shadow-3) inset,
+    0 1px 0 var(--calc-shadow-14);
+}
+.ros-calc__lcd::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(90deg, var(--calc-bg-14) 0 1px, transparent 1px 3px),
+    linear-gradient(180deg, var(--calc-bg-15), transparent 30%);
+  mix-blend-mode: multiply;
+  opacity: 0.5;
+}
+.ros-calc__glass {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  border-radius: 14px;
+  overflow: hidden;
+}
+.ros-calc__glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    123deg,
+    var(--calc-bg-16) 40%,
+    var(--calc-bg-17) 60%,
+    var(--calc-bg-18) 100%
+  );
+  clip-path: polygon(34% 0, 100% 0, 100% 80%);
+  // The LCD's glass glare slides further than the body — it's the most visible
+  // reflection. .ros-calc__glass has overflow:hidden so the streak is clipped
+  // to the screen as it moves.
+  transform: translate3d(calc(var(--tilt-x, 0) * 16px), calc(var(--tilt-y, 0) * 12px), 0);
+  will-change: transform;
+}
+.ros-calc__flags {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  color: var(--lcd-ink-soft);
+  height: 14px;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+.ros-calc__flag {
+  opacity: 0.32;
+  transition: opacity 0.15s;
+  font-weight: 600;
+  &.is-on {
+    opacity: 1;
+    color: var(--lcd-ink);
+  }
+}
+.ros-calc__expr {
+  text-align: right;
+  min-height: 22px;
+  font-size: clamp(13px, 4cqw, 15px);
+  color: var(--lcd-ink-soft);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  direction: rtl;
+  span {
+    direction: ltr;
+    unicode-bidi: plaintext;
+  }
+}
+.ros-calc__main {
+  height: clamp(46px, 16cqw, 62px);
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  font-weight: 500;
+  color: var(--lcd-ink);
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  margin-top: 2px;
+  text-shadow: 0 1px 0 rgba(var(--ros-white-rgb), 0.25);
+  span {
+    direction: ltr;
+    unicode-bidi: plaintext;
+  }
+  &.len-1 {
+    font-size: clamp(40px, 15cqw, 54px);
+  }
+  &.len-2 {
+    font-size: clamp(31px, 11.7cqw, 42px);
+  }
+  &.len-3 {
+    font-size: clamp(23px, 8.6cqw, 31px);
+  }
+  &.len-4 {
+    font-size: clamp(16px, 6.1cqw, 22px);
+  }
+}
+.ros-calc__lcd.is-error .ros-calc__main {
+  color: oklch(0.5 0.16 30);
+}
+
+// ---------------- pad ----------------
+.ros-calc__pad {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(8px, 2.4cqw, 12px);
+  position: relative;
+  z-index: 5;
+}
+.ros-calc__grid {
+  display: grid;
+  gap: clamp(7px, 2cqw, 10px);
+}
+.ros-calc__grid--mem,
+.ros-calc__grid--main {
+  grid-template-columns: repeat(4, 1fr);
+}
+// Every key-group is a flex row-band that shares the pad height proportionally
+// to its row count (sci 3 · mem 1 · main 5). Rows are minmax(0,1fr) and keys
+// have no min-height, so the whole keypad shrinks to fit ANY window height —
+// with the scientific block open or closed it never overflows / clips.
+.ros-calc__grid--sci {
+  grid-template-columns: repeat(5, 1fr);
+  flex: 1;
+  min-height: 0;
+  grid-auto-rows: minmax(0, 1fr);
+}
+.ros-calc__grid--mem {
+  flex: 1;
+  min-height: 0;
+  grid-template-rows: minmax(0, 1fr);
+}
+.ros-calc__grid--main {
+  flex: 5;
+  min-height: 0;
+  grid-template-rows: repeat(5, minmax(0, 1fr));
+}
+// Scientific block: collapses to zero height when off, takes 3 row-shares when
+// on. Animating flex-grow gives a smooth "rows expand into place" reveal while
+// keeping the band flexible (no fixed max-height that could clip).
+//
+// The block needs overflow:hidden for the collapse, but each key casts a drop
+// shadow that extends below/around its box — without room, overflow:hidden
+// slices the BOTTOM sci row's shadow + rounded corners (no row beneath it to
+// catch the shadow, unlike the inner rows). Fix: bleed the clip box outward
+// with negative margins and pad .ros-calc__sci back by the same amount, so the
+// shadows render inside the visible area and the columns still line up with the
+// mem/main rows. The bottom gets extra clearance for the full shadow reach.
+.ros-calc__sci-wrap {
+  // Horizontal bleed stays under the device padding so the wrap never spills
+  // past the moulded body; the bottom clearance below is larger because the
+  // key drop shadow reaches ~16px down (0 3px ledge + 0 6px/10px drop).
+  --sci-bleed: clamp(9px, 3cqw, 12px);
+  flex: 0 1 0;
+  min-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  display: flex;
+  margin-left: calc(-1 * var(--sci-bleed));
+  margin-right: calc(-1 * var(--sci-bleed));
+  transition:
+    flex-grow 0.28s ease,
+    opacity 0.24s ease;
+}
+.ros-calc__sci {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(7px, 2cqw, 10px);
+  padding: 0 var(--sci-bleed) clamp(15px, 4.6cqw, 18px);
+}
+.ros-calc__device--sci .ros-calc__sci-wrap {
+  flex-grow: 3;
+  opacity: 1;
+}
+
+// ---------------- keys ----------------
+.ros-calc__key {
+  position: relative;
+  border: none;
+  cursor: pointer;
+  border-radius: 13px;
+  font-family: inherit;
+  font-size: clamp(17px, 5.8cqw, 22px);
+  font-weight: 500;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--num-ink);
+  background: linear-gradient(180deg, var(--num-1), var(--num-2));
+  box-shadow:
+    0 1px 0 var(--calc-shadow-15) inset,
+    0 -2px 2px var(--calc-shadow-16) inset,
+    0 3px 0 var(--calc-shadow-17),
+    0 6px 10px var(--calc-bg-9);
+  transition:
+    transform 0.05s ease,
+    box-shadow 0.05s ease,
+    filter 0.12s;
+
+  sup {
+    font-size: 0.62em;
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 3px;
+    right: 3px;
+    top: 2px;
+    height: 46%;
+    border-radius: 11px 11px 55% 55% / 11px 11px 26px 26px;
+    background: linear-gradient(180deg, var(--calc-bg-19), var(--calc-shadow-11) 78%, transparent);
+    pointer-events: none;
+  }
+  &:hover {
+    filter: brightness(1.03);
+  }
+  &:active {
+    transform: translateY(3px);
+    box-shadow:
+      0 1px 0 var(--calc-shadow-18) inset,
+      0 1px 0 var(--calc-shadow-17),
+      0 2px 4px var(--calc-shadow-19);
+    &::before {
+      opacity: 0.5;
+      height: 40%;
+    }
+  }
+}
+.key__accent {
+  color: var(--accent-text);
+  font-family: 'SF Mono', 'JetBrains Mono', ui-monospace, monospace;
+  font-weight: 600;
+  font-size: 0.82em;
+  letter-spacing: 0.02em;
+}
+
+.ros-calc__key.key--fn {
+  color: var(--fn-ink);
+  background: linear-gradient(180deg, var(--fn-1), var(--fn-2));
+  box-shadow:
+    0 1px 0 var(--calc-bg-17) inset,
+    0 -2px 2px var(--calc-shadow-20) inset,
+    0 3px 0 var(--calc-shadow-21),
+    0 6px 10px var(--calc-shadow-10);
+  font-size: clamp(14px, 4.6cqw, 18px);
+  &::before {
+    background: linear-gradient(180deg, var(--calc-bg-15), var(--calc-bg-20) 80%, transparent);
+  }
+  &:active,
+  &.is-active {
+    box-shadow:
+      0 1px 0 var(--calc-shadow-7) inset,
+      0 1px 0 var(--calc-shadow-21),
+      0 2px 4px var(--calc-shadow-20);
+  }
+  &.is-active {
+    color: var(--accent-text);
+  }
+}
+.ros-calc__key.key--del {
+  color: var(--del-text);
+  font-weight: 600;
+}
+.ros-calc__key.key--op {
+  color: var(--op-ink);
+  font-weight: 600;
+  font-size: clamp(20px, 6.6cqw, 25px);
+  background: linear-gradient(180deg, var(--op-1), var(--op-2));
+  box-shadow:
+    0 1px 0 var(--calc-shadow-22) inset,
+    0 -2px 2px var(--calc-shadow-23) inset,
+    0 3px 0 oklch(0.6 0.14 60),
+    0 6px 12px var(--calc-shadow-24);
+  &::before {
+    background: linear-gradient(
+      180deg,
+      var(--calc-shadow-18),
+      var(--calc-shadow-11) 80%,
+      transparent
+    );
+  }
+  &:active {
+    box-shadow:
+      0 1px 0 var(--calc-shadow-25) inset,
+      0 1px 0 oklch(0.6 0.14 60),
+      0 2px 5px var(--calc-shadow-26);
+  }
+}
+.ros-calc__key.key--eq {
+  background: linear-gradient(180deg, var(--eq-1), var(--eq-2));
+  box-shadow:
+    0 1px 0 var(--calc-shadow-27) inset,
+    0 -2px 2px var(--calc-shadow-28) inset,
+    0 3px 0 oklch(0.56 0.15 52),
+    0 6px 14px var(--calc-shadow-29);
+}
+
+// ---------------- history drawer ----------------
+.ros-calc__history {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  justify-content: flex-end;
+  background: var(--calc-bg-21);
+  border-radius: inherit;
+  overflow: hidden;
+}
+.ros-calc__history-panel {
+  width: min(82%, 300px);
+  height: 100%;
+  background: linear-gradient(180deg, var(--calc-bg-22), var(--calc-bg-23));
+  box-shadow: -12px 0 40px var(--ros-shadow-30);
+  display: flex;
+  flex-direction: column;
+}
+.ros-calc__history-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px;
+  border-bottom: 1px solid rgba(var(--ros-black-rgb), 0.08);
+  h2 {
+    font-family: 'SF Mono', 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 13px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--calc-fg-4);
+    margin: 0;
+  }
+  button {
+    background: none;
+    border: none;
+    font-size: 13px;
+    color: var(--calc-fg-5);
+    cursor: pointer;
+    font-weight: 600;
+  }
+}
+.ros-calc__history-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 6px 0;
+  // A barra discreta sobre o fundo escuro do app. Era a classe global `ros-scrollbar-dark`
+  // do RoqueOS; aqui fica do próprio app, que roda igual fora dele.
+  scrollbar-width: thin;
+  scrollbar-color: rgba(var(--ros-white-rgb), 0.15) transparent;
+}
+.ros-calc__history-empty {
+  padding: 40px 24px;
+  text-align: center;
+  color: var(--calc-fg-6);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.ros-calc__hitem {
+  width: 100%;
+  text-align: right;
+  padding: 12px 18px;
+  cursor: pointer;
+  border: none;
+  background: none;
+  border-bottom: 1px solid rgba(var(--ros-black-rgb), 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  transition: background 0.12s;
+  &:hover {
+    background: rgba(var(--ros-black-rgb), 0.04);
+  }
+}
+.ros-calc__hitem-expr {
+  font-family: 'SF Mono', 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 12px;
+  color: var(--calc-fg-7);
+}
+.ros-calc__hitem-res {
+  font-family: 'SF Mono', 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 19px;
+  color: var(--calc-fg-8);
+  font-weight: 500;
+}
+
+.ros-calc-hist-enter-active,
+.ros-calc-hist-leave-active {
+  transition: background 0.3s ease;
+  .ros-calc__history-panel {
+    transition: transform 0.32s cubic-bezier(0.22, 0.9, 0.3, 1);
+  }
+}
+.ros-calc-hist-enter-from,
+.ros-calc-hist-leave-to {
+  background: var(--calc-bg-24);
+  .ros-calc__history-panel {
+    transform: translateX(100%);
+  }
+}
+
+// ---------------- low-end mode ----------------
+html[data-low-end='1'] {
+  .ros-calc__device::before,
+  .ros-calc__device::after,
+  .ros-calc__lcd::after,
+  .ros-calc__glass {
+    display: none;
+  }
+  .ros-calc__key {
+    box-shadow:
+      0 2px 0 var(--calc-shadow-17),
+      0 3px 5px var(--calc-shadow-30);
+    &::before {
+      display: none;
+    }
+  }
+  .ros-calc__key.key--fn {
+    box-shadow: 0 2px 0 var(--calc-shadow-21);
+  }
+  .ros-calc__key.key--op {
+    box-shadow: 0 2px 0 oklch(0.6 0.14 60);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ros-calc__key,
+  .ros-calc__sci-wrap,
+  .ros-calc-hist-enter-active,
+  .ros-calc-hist-leave-active {
+    transition: none;
+  }
+}
+
+.ros-calc *,
+.ros-calc *::before,
+.ros-calc *::after {
+  box-sizing: inherit;
+}
