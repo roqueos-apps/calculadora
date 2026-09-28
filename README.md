@@ -67,6 +67,15 @@ yarn test         # só os testes
 Na janela do `yarn dev`, `?idioma=ar-AR` abre em árabe (da direita para a esquerda) e
 `?leve=1` mostra o app como o aparelho fraco vê.
 
+## Paridade com o app de antes
+
+`paridade.json` é o inventário do que a Calculadora fazia dentro do RoqueOS e do que aconteceu com
+cada coisa na saída: `mantida`, `mudou` (com a nota do que mudou) ou `perdida` (só com a
+decisão escrita de quem decidiu). Cada item cita o teste deste repo que o prova, ou a
+evidência. O RoqueOS confere o arquivo no pacote instalado antes de aceitar a versão: teste
+citado que não existe mais, estado de dúvida ou perda sem decisão reprovam. Mudou uma
+funcionalidade, ou um teste citado ali? Atualize o inventário no mesmo commit.
+
 ## Contribuir
 
 Leia o [CONTRIBUTING.md](CONTRIBUTING.md). Todo commit leva `Signed-off-by` (DCO), e o CI
@@ -101,3 +110,8 @@ Run `yarn install --ignore-scripts`, then `yarn dev` to open it in a fake RoqueO
 a language picker, or `yarn verificar` to run what CI runs. Every commit must be signed off
 (DCO). Licensed under [MIT](LICENSE); the history icon is Material Icons `history`
 (Apache-2.0), drawn inline. The RoqueOS name and brand belong to LEVELHARD and are not covered.
+
+`paridade.json` lists everything this app did inside the RoqueOS core and what happened to each
+item when it moved out (kept, changed with a note, or lost only with a written decision), each
+backed by a test in this repository or other evidence. RoqueOS checks it in the installed
+package before accepting a version.

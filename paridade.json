@@ -1,0 +1,443 @@
+{
+  "versao": 1,
+  "app": "calculator",
+  "antes": "O componente da Calculadora dentro do RoqueOS, até 27/09/2026: o componente de tela, o estilo de antes, a composable de inclinação do dispositivo e os textos da Calculadora nos dez idiomas, mais o registro do app no RoqueOS: a entrada no registro de apps, o sistema que juntava texto ao componente, o nome e a descrição nos dez idiomas, e a pré-carga em segundo plano.",
+  "auditoria": "28/09/2026: linha a linha, o código de antes (o componente da Calculadora dentro do RoqueOS, o estilo de antes, a composable de inclinação e os dez arquivos de texto, mais o diff de integração ao sair do núcleo) contra o do repo roqueos-apps/calculadora (6fe6f75) e o lado do sistema no RoqueOS. O motor e os textos foram conferidos por script: src/motor.js é idêntico byte a byte ao motor de antes, dentro do RoqueOS, e as 5 chaves nos 10 idiomas têm os mesmos valores. As 5 dúvidas da auditoria (#51, #56, #58, #59, #61) e os estados de #33 e #44 seguem os veredictos conferidos no código do RoqueOS no mesmo dia; os testes citados são os do repo hoje. As 63 linhas da auditoria existiam antes e todas entram. Ficou de fora o que a auditoria conferiu que não existia antes: copiar e colar (a raiz tem user-select: none e não há atalho de área de transferência), persistência, avisos, métricas próprias, conta ou uso sem conta, Finder e abrir com, mesa ou widget, IA e coleções (o componente de antes não importava nada de armazenamento, métricas nem notificação, e o app.json tem capacidades vazias). Também ficam de fora as novidades do depois (repo próprio, yarn dev com janela falsa, box-sizing próprio, troca de idioma fora de ordem, motor em módulo separado), que não são paridade. Nada foi medido no iPhone nem num Android de verdade.",
+  "funcionalidades": [
+    {
+      "o_que": "Dígitos de 0 a 9",
+      "estado": "mantida",
+      "testes": [
+        "test/Calculadora.spec.js › adds two numbers and shows the expression",
+        "test/Calculadora.spec.js › grows the LCD length class as the number gets longer"
+      ],
+      "evidencia": "src/Calculadora.vue:126-142 e 301-306, iguais ao componente de antes, dentro do RoqueOS."
+    },
+    {
+      "o_que": "Ponto decimal: ignora o segundo ponto e põe \"0.\" sozinho",
+      "estado": "mantida",
+      "testes": ["test/Calculadora.spec.js › handles a decimal point and ignores a second dot"],
+      "evidencia": "src/Calculadora.vue:143 e 308-313, iguais ao componente de antes, dentro do RoqueOS. O \"0.\" automático (ponto no vazio ou depois de operador) não tem teste."
+    },
+    {
+      "o_que": "Quatro operações com precedência (× e ÷ antes de + e −)",
+      "estado": "mantida",
+      "testes": [
+        "test/Calculadora.spec.js › respects operator precedence (× before +)",
+        "test/motor.spec.js › respeita a precedência e a associatividade da potência"
+      ],
+      "evidencia": "Teclas em src/Calculadora.vue:124-139; a conta em src/motor.js:8-137, idêntico byte a byte ao motor de antes, dentro do RoqueOS (conferido por script)."
+    },
+    {
+      "o_que": "Operador novo troca o anterior; \"−\" depois de ×, ÷, ^ ou ( vira sinal",
+      "estado": "mantida",
+      "testes": ["test/motor.spec.js › o menos unário liga mais forte que × e mais fraco que ^"],
+      "evidencia": "src/Calculadora.vue:326-337, igual ao componente de antes, dentro do RoqueOS. O teste cobre só a conta de 3×−2 no motor; a troca de operador e o sinal na tela não têm teste."
+    },
+    {
+      "o_que": "Menos unário: −2^2 dá −4",
+      "estado": "mantida",
+      "testes": ["test/motor.spec.js › o menos unário liga mais forte que × e mais fraco que ^"],
+      "evidencia": "src/motor.js:10, 59-61 e 103-121, idênticos ao motor de antes, dentro do RoqueOS."
+    },
+    {
+      "o_que": "± nega o número final, desfaz, nega o resultado e abre \"(−\" no vazio",
+      "estado": "mantida",
+      "testes": ["test/Calculadora.spec.js › negates the trailing number"],
+      "evidencia": "src/Calculadora.vue:141 e 393-412, iguais ao componente de antes, dentro do RoqueOS. Só o primeiro caso tem teste; desfazer, negar o resultado e o \"(−\" no vazio não têm."
+    },
+    {
+      "o_que": "\"=\" mostra o resultado e \"conta =\" no visor de cima",
+      "estado": "mantida",
+      "testes": ["test/Calculadora.spec.js › adds two numbers and shows the expression"],
+      "evidencia": "src/Calculadora.vue:144, 253 e 414-433, iguais ao componente de antes, dentro do RoqueOS."
+    },
+    {
+      "o_que": "Seguir a conta a partir do resultado: operador usa o resultado, dígito recomeça",
+      "estado": "mantida",
+      "testes": ["test/Calculadora.spec.js › starts fresh input after an error"],
+      "evidencia": "src/Calculadora.vue:293-299, 303 e 315-321, iguais ao componente de antes, dentro do RoqueOS. Só o caminho depois do erro tem teste; o operador que continua do resultado e o dígito depois de conta certa não têm."
+    },
+    {
+      "o_que": "Erro: \"Error\" no visor, LCD vermelho, conta fora do histórico",
+      "estado": "mantida",
+      "testes": [
+        "test/Calculadora.spec.js › shows Error on divide-by-zero and clears with AC",
+        "test/motor.spec.js › conta impossível lança, e a tela mostra Error"
+      ],
+      "evidencia": "src/Calculadora.vue:41 e 419-424, src/calculadora.scss:414-416, iguais ao componente e ao estilo de antes, dentro do RoqueOS. O LCD vermelho (classe is-error) e a conta com erro ficar fora do histórico não têm teste."
+    },
+    {
+      "o_que": "AC limpa tudo",
+      "estado": "mantida",
+      "testes": ["test/Calculadora.spec.js › shows Error on divide-by-zero and clears with AC"],
+      "evidencia": "src/Calculadora.vue:121 e 386-391, iguais ao componente de antes, dentro do RoqueOS."
+    },
+    {
+      "o_que": "⌫ apaga um caractere, apaga \"sin(\" inteiro e vira AC sobre o resultado",
+      "estado": "mantida",
+      "testes": ["test/Calculadora.spec.js › backspace removes the last character"],
+      "evidencia": "src/Calculadora.vue:122 e 374-384, iguais ao componente de antes, dentro do RoqueOS. Só o caractere simples tem teste; apagar a função inteira e o AC sobre o resultado não têm."
+    },
+    {
+      "o_que": "% pós-fixo (divide por 100)",
+      "estado": "mantida",
+      "testes": [
+        "test/Calculadora.spec.js › treats percent as a postfix (÷100)",
+        "test/motor.spec.js › pós-fixos: fatorial, quadrado e porcentagem"
+      ],
+      "evidencia": "src/Calculadora.vue:123 e src/motor.js:85-89 e 180, iguais ao componente e ao motor de antes, dentro do RoqueOS."
+    },
+    {
+      "o_que": "Modo SCI: o chip liga o bloco científico, que abre animado",
+      "estado": "mantida",
+      "testes": ["test/Calculadora.spec.js › toggles scientific mode"],
+      "evidencia": "src/Calculadora.vue:18-26 e 463-465, src/calculadora.scss:467-494, iguais ao componente e ao estilo de antes, dentro do RoqueOS. O aria-pressed e a animação não têm teste; a animação não foi medida na tela."
+    },
+    {
+      "o_que": "2nd/INV: sin, cos e tan viram asin, acos e atan, com a flag INV",
+      "estado": "mantida",
+      "testes": ["test/motor.spec.js › trigonometria em graus e em radianos"],
+      "evidencia": "src/Calculadora.vue:45, 63-70, 79-87 e 466-468, iguais ao componente de antes, dentro do RoqueOS. O teste cobre só asin(1) no motor; a tecla 2nd trocando as teclas e a flag INV na tela não têm teste."
+    },
+    {
+      "o_que": "x², √, xʸ (associa à direita) e n! (Error em negativo, fracionário ou acima de 170)",
+      "estado": "mantida",
+      "testes": [
+        "test/Calculadora.spec.js › evaluates a scientific function (√)",
+        "test/motor.spec.js › respeita a precedência e a associatividade da potência",
+        "test/motor.spec.js › pós-fixos: fatorial, quadrado e porcentagem",
+        "test/motor.spec.js › conta impossível lança, e a tela mostra Error"
+      ],
+      "evidencia": "src/Calculadora.vue:71-76 e 346-350, src/motor.js:9 e 142-149, idênticos ao componente e ao motor de antes, dentro do RoqueOS. O fatorial de fracionário e acima de 170 não tem teste."
+    },
+    {
+      "o_que": "sin, cos, tan, log e ln",
+      "estado": "mantida",
+      "testes": ["test/motor.spec.js › trigonometria em graus e em radianos"],
+      "evidencia": "src/Calculadora.vue:79-90 e src/motor.js:151-176, idênticos ao componente e ao motor de antes, dentro do RoqueOS. O teste confere sin e asin; cos, tan, log e ln não têm teste de valor (o teste das fichas só tokeniza log(e))."
+    },
+    {
+      "o_que": "Constantes π e e",
+      "estado": "mantida",
+      "testes": ["test/motor.spec.js › as fichas da expressão, com π e e como número"],
+      "evidencia": "src/Calculadora.vue:92-93 e 351-355, src/motor.js:32-41, iguais ao componente e ao motor de antes, dentro do RoqueOS. O teste só confere o tipo da ficha, não o valor."
+    },
+    {
+      "o_que": "Parênteses: fecham sozinhos no \"=\", e o operador pendurado no fim é ignorado",
+      "estado": "mantida",
+      "testes": ["test/motor.spec.js › fecha parêntese aberto e ignora operador pendurado no fim"],
+      "evidencia": "src/Calculadora.vue:94-95 e 356-364, src/motor.js:217-226, iguais ao componente e ao motor de antes, dentro do RoqueOS. A trava do \")\" na tela (só fecha com parêntese aberto e depois de um valor) não tem teste."
+    },
+    {
+      "o_que": "Multiplicação implícita (2π, 3(, )(, 5√, MR)",
+      "estado": "mantida",
+      "evidencia": "src/Calculadora.vue:245, 304, 343, 348, 353, 359 e 456, iguais ao componente de antes, dentro do RoqueOS. Sem teste: o × implícito é posto pela tela, e nenhum teste aperta essas sequências."
+    },
+    {
+      "o_que": "DEG/RAD: a tecla alterna, e as flags só aparecem com SCI",
+      "estado": "mantida",
+      "testes": ["test/motor.spec.js › trigonometria em graus e em radianos"],
+      "evidencia": "src/Calculadora.vue:43-44, 96-98 e 469-471, src/motor.js:139-140, iguais ao componente e ao motor de antes, dentro do RoqueOS. O teste cobre graus e radianos no motor; a tecla e as flags não têm teste."
+    },
+    {
+      "o_que": "Número com 12 dígitos significativos, notação científica acima de 1e12 ou abaixo de 1e-9",
+      "estado": "mantida",
+      "testes": [
+        "test/motor.spec.js › formata: doze dígitos significativos, e notação científica fora da faixa"
+      ],
+      "evidencia": "src/motor.js:232-244, idêntico ao motor de antes, dentro do RoqueOS."
+    },
+    {
+      "o_que": "Prévia \"= resultado\" enquanto digita",
+      "estado": "mantida",
+      "evidencia": "src/Calculadora.vue:252-267, igual ao componente de antes, dentro do RoqueOS. Sem teste."
+    },
+    {
+      "o_que": "Fonte do visor diminui conforme o número cresce",
+      "estado": "mantida",
+      "testes": ["test/Calculadora.spec.js › grows the LCD length class as the number gets longer"],
+      "evidencia": "src/Calculadora.vue:269-275 e src/calculadora.scss:401-412, iguais ao componente e ao estilo de antes, dentro do RoqueOS. O teste vai de len-1 a len-2; len-3, len-4 e o tamanho da fonte não têm teste."
+    },
+    {
+      "o_que": "Expressão longa mostra o fim, não o começo",
+      "estado": "mantida",
+      "evidencia": "src/calculadora.scss:371-384 (rtl no contêiner, ltr no texto), igual ao estilo de antes, dentro do RoqueOS. Sem teste; não medido na tela."
+    },
+    {
+      "o_que": "Flags do visor: DEG, RAD, INV e M",
+      "estado": "mantida",
+      "evidencia": "src/Calculadora.vue:42-47, igual ao componente de antes, dentro do RoqueOS. Sem teste."
+    },
+    {
+      "o_que": "Memória MC, MR, M+ e M− (M+ avalia a conta em andamento)",
+      "estado": "mantida",
+      "testes": ["test/Calculadora.spec.js › memory add then recall"],
+      "evidencia": "src/Calculadora.vue:104-117 e 438-458, iguais ao componente de antes, dentro do RoqueOS. MC, M− e o M+ sobre conta em andamento não têm teste."
+    },
+    {
+      "o_que": "Histórico guarda só conta certa, a mais nova em cima, até 60",
+      "estado": "mantida",
+      "testes": ["test/Calculadora.spec.js › records and recalls history"],
+      "evidencia": "src/Calculadora.vue:428, igual ao componente de antes, dentro do RoqueOS. O teste só confere que grava; a ordem e o limite de 60 não têm teste."
+    },
+    {
+      "o_que": "Botão do histórico: chip com ícone de relógio e nome para leitor de tela",
+      "estado": "mudou",
+      "testes": [
+        "test/Calculadora.spec.js › shows the texts it received, and the history button has its label"
+      ],
+      "evidencia": "src/Calculadora.vue:27-36 e 199-202, src/calculadora.scss:293-298, no lugar do componente de antes, dentro do RoqueOS. O teste confere o aria-label e o desenho do SVG; o ícone não foi comparado na tela lado a lado.",
+      "nota": "O q-icon history do Quasar virou SVG inline da mesma figura (Material Icons history), também com 16px e na cor do chip. Nada se perde."
+    },
+    {
+      "o_que": "Tocar num item do histórico traz o resultado de volta e fecha a gaveta",
+      "estado": "mantida",
+      "evidencia": "src/Calculadora.vue:160-169 e 485-492, iguais ao componente de antes, dentro do RoqueOS. Sem teste: o teste \"records and recalls history\" diz recalls no nome e não chama o recall."
+    },
+    {
+      "o_que": "Limpar o histórico",
+      "estado": "mantida",
+      "evidencia": "src/Calculadora.vue:154 e 482-484, iguais ao componente de antes, dentro do RoqueOS. Sem teste."
+    },
+    {
+      "o_que": "Histórico vazio: \"Nenhum cálculo ainda. / Os resultados aparecerão aqui.\"",
+      "estado": "mantida",
+      "testes": [
+        "test/Calculadora.spec.js › shows the texts it received, and the history button has its label"
+      ],
+      "evidencia": "src/Calculadora.vue:157-159, igual ao componente de antes, dentro do RoqueOS. O teste confere a primeira linha; a segunda não tem teste."
+    },
+    {
+      "o_que": "Gaveta do histórico fecha tocando fora ou com Esc, e desliza",
+      "estado": "mantida",
+      "evidencia": "src/Calculadora.vue:149-150, 479-481 e 526, src/calculadora.scss:706-720, iguais ao componente e ao estilo de antes, dentro do RoqueOS. Sem teste; o deslize não foi medido na tela."
+    },
+    {
+      "o_que": "Barra de rolagem da lista do histórico",
+      "estado": "mudou",
+      "evidencia": "src/calculadora.scss:662-669 usa rgba(var(--ros-white-rgb), 0.15); antes, a classe de rolagem escura do estilo de antes, dentro do RoqueOS, usava rgba(var(--ros-fill-rgb), 0.15), a mesma variável do contrato do app-sdk. Sem teste; não medido na tela com 15 itens ou mais.",
+      "nota": "No tema padrão é igual: o polegar é branco a 15%, quase invisível no painel claro, antes e depois. Nos temas oceano e âmbar o polegar era tingido de leve; hoje é branco em todos. Não é perda."
+    },
+    {
+      "o_que": "Nada é gravado: histórico, memória e modos duram só com a janela aberta",
+      "estado": "mantida",
+      "evidencia": "src/Calculadora.vue:211-222 (estado só em ref), igual ao componente de antes, dentro do RoqueOS; o app não usa nada de armazenamento do sistema, e o README diz que ela não grava nada. Sem teste."
+    },
+    {
+      "o_que": "Teclado físico: 0 a 9, ponto ou vírgula, +, -, *, /, ^, parênteses, %, !, Enter e =, Backspace, Esc (fecha o histórico ou faz AC)",
+      "estado": "mantida",
+      "testes": [
+        "test/Calculadora.spec.js › types from the physical keyboard only while the window is active",
+        "test/app.spec.js › ativar liga e desliga o teclado físico"
+      ],
+      "evidencia": "src/Calculadora.vue:505-528, igual ao componente de antes, dentro do RoqueOS. Os testes apertam 4, *, 2, Enter e 9; vírgula, /, ^, parênteses, %, !, Backspace e Esc não têm teste."
+    },
+    {
+      "o_que": "Teclado só vale na janela ativa e fora de campo de texto",
+      "estado": "mudou",
+      "testes": [
+        "test/Calculadora.spec.js › types from the physical keyboard only while the window is active",
+        "test/app.spec.js › ativar liga e desliga o teclado físico"
+      ],
+      "evidencia": "src/Calculadora.vue:499-503 e src/index.js:48-50, iguais ao componente de antes, dentro do RoqueOS; a janela do RoqueOS agora passa esse estado como prop. A trava de input, textarea e contenteditable é igual e não tem teste. Duas janelas trocando de foco não foi medido na tela.",
+      "nota": "Antes o teclado só valia dentro da classe CSS que marcava a janela ativa no DOM do RoqueOS. Agora vale conforme uma prop que a janela do RoqueOS passa ao app, dizendo se ela está ativa: o valor inicial vem do mount, e depois ela muda quando a janela é ativada ou desativada. Onde a janela passa essa prop, o comportamento é o mesmo de antes; se ela não passar, o app assume que está sempre ativa, o que também é diferente: antes, fora da janela ativa, o teclado nunca valia."
+    },
+    {
+      "o_que": "Fechar a janela solta o ouvinte de teclado",
+      "estado": "mantida",
+      "testes": ["test/Calculadora.spec.js › stops listening to the keyboard when unmounted"],
+      "evidencia": "src/Calculadora.vue:531-532, igual ao componente de antes, dentro do RoqueOS. A asserção do teste é fraca: not.toThrow() passa mesmo com o ouvinte vivo."
+    },
+    {
+      "o_que": "Reflexo pelo acelerômetro (Android direto; iPhone pede permissão uma vez, no primeiro toque)",
+      "estado": "mantida",
+      "testes": [
+        "test/useInclinacao.spec.js › moves the tilt toward orientation input on permission-free browsers (Android)",
+        "test/useInclinacao.spec.js › requestMotion grants iOS orientation permission then listens",
+        "test/useInclinacao.spec.js › requestMotion stays static when permission is denied",
+        "test/useInclinacao.spec.js › o pedido de permissão do iOS acontece UMA vez",
+        "test/useInclinacao.spec.js › clamps tilt to [-1, 1]"
+      ],
+      "evidencia": "src/Calculadora.vue:4 e 228-240, src/useInclinacao.js:58-66, 86-100 e 112-117, iguais ao componente e à composable de inclinação de antes, dentro do RoqueOS. O pedido no primeiro toque (pointerdown na raiz) não tem teste. Não medido no aparelho."
+    },
+    {
+      "o_que": "Reflexo pelo ponteiro no computador (força 0,85, volta ao centro ao sair, o giroscópio manda)",
+      "estado": "mantida",
+      "testes": [
+        "test/useInclinacao.spec.js › falls back to pointer position over the target element",
+        "test/useInclinacao.spec.js › quando o giroscópio assume, o ponteiro para de mandar"
+      ],
+      "evidencia": "src/Calculadora.vue:229 e src/useInclinacao.js:68-82, iguais ao componente e à composable de inclinação de antes, dentro do RoqueOS. A força 0,85 que a tela passa e a volta ao centro ao sair sem giroscópio não têm teste."
+    },
+    {
+      "o_que": "Brilho da carcaça e do vidro do LCD segue a inclinação",
+      "estado": "mantida",
+      "evidencia": "src/calculadora.scss:195 e 348 (--tilt-x e --tilt-y), iguais ao estilo de antes, dentro do RoqueOS. Sem teste; não medido na tela nem no aparelho."
+    },
+    {
+      "o_que": "Ouvintes do reflexo passivos (não travam a rolagem) e soltos ao fechar",
+      "estado": "mantida",
+      "testes": [
+        "test/useInclinacao.spec.js › os três ouvintes são passivos",
+        "test/useInclinacao.spec.js › removes listeners on unmount"
+      ],
+      "evidencia": "src/useInclinacao.js:94, 116, 120-121 e 125-135, iguais à composable de inclinação de antes, dentro do RoqueOS."
+    },
+    {
+      "o_que": "Reflexo desligado com movimento reduzido (prefers-reduced-motion)",
+      "estado": "mantida",
+      "testes": [
+        "test/useInclinacao.spec.js › stays inert under prefers-reduced-motion (no listener, no movement)"
+      ],
+      "evidencia": "src/useInclinacao.js:104-105, igual à composable de inclinação de antes, dentro do RoqueOS."
+    },
+    {
+      "o_que": "Reflexo desligado no perfil leve",
+      "estado": "mudou",
+      "testes": [
+        "test/useInclinacao.spec.js › stays inert when the system asks for the light profile (desempenho.modoLeve)",
+        "test/useInclinacao.spec.js › ignores the RoqueOS data-low-end attribute: the light profile comes from the system"
+      ],
+      "evidencia": "src/Calculadora.vue:228-231 e src/useInclinacao.js:102-111, iguais à composable de inclinação de antes, dentro do RoqueOS. Os testes são do composable: nenhum teste monta a Calculadora com modoLeve ligado (o montar do app.spec.js aceita modoLeve e nenhum teste usa), então a ligação da tela com o sistema não tem teste. Não medido no aparelho fraco.",
+      "nota": "Antes o reflexo lia o atributo html[data-low-end] do documento; agora pergunta ao sistema, por sistema.desempenho.modoLeve. Nos dois casos a leitura é uma vez, ao abrir."
+    },
+    {
+      "o_que": "Visual leve no perfil leve: sem brilho, sem grão, sombras simples",
+      "estado": "mudou",
+      "evidencia": "src/calculadora.scss:721-743, igual ao estilo de antes, dentro do RoqueOS: o seletor continua html[data-low-end='1']. Sem teste; não medido na tela com o perfil leve ligado.",
+      "nota": "Dentro do RoqueOS a pessoa vê o mesmo: o CSS lê o atributo do documento e reage na hora, como antes. O que mudou é que o perfil leve agora tem duas fontes: o reflexo segue o sistema, e o visual segue o atributo html[data-low-end] do RoqueOS, que não é do contrato do SDK. Fora do RoqueOS (o yarn dev com ?leve=1, por exemplo) o visual leve só vale se quem hospeda escrever o atributo."
+    },
+    {
+      "o_que": "Sem transições com movimento reduzido",
+      "estado": "mantida",
+      "evidencia": "src/calculadora.scss:745-753, igual ao estilo de antes, dentro do RoqueOS. Sem teste."
+    },
+    {
+      "o_que": "Janela estreita ou baixa: teclado encolhe em qualquer tamanho, carcaça até 460px",
+      "estado": "mantida",
+      "evidencia": "src/calculadora.scss:139-150 e 428-494 (container queries, grade com minmax), iguais ao estilo de antes, dentro do RoqueOS, trecho sem diff. Sem teste; não medido na tela."
+    },
+    {
+      "o_que": "iPhone: rodapé no espaço da barra de início (área segura)",
+      "estado": "mantida",
+      "evidencia": "src/calculadora.scss:108-112 usa var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)), igual ao estilo de antes, dentro do RoqueOS: a variável do contrato do app-sdk que o RoqueOS congela no app nativo, com o env() de reserva. Sem teste; não medido no iPhone."
+    },
+    {
+      "o_que": "Carcaça de calculadora de mesa: ROQUE RX·200, células solares, grão, tecla que afunda, sem seleção de texto",
+      "estado": "mantida",
+      "evidencia": "src/Calculadora.vue:6-16 e 54, src/calculadora.scss:114-115, 158-210 e 497-549, iguais ao componente e ao estilo de antes, dentro do RoqueOS. Sem teste; não comparado na tela lado a lado."
+    },
+    {
+      "o_que": "Rodapé \"powered by LEVELHARD\"",
+      "estado": "mantida",
+      "testes": [
+        "test/Calculadora.spec.js › shows the texts it received, and the history button has its label"
+      ],
+      "evidencia": "src/Calculadora.vue:176-178 e 206, iguais ao componente de antes, dentro do RoqueOS. O teste confere \"powered by\"; a marca LEVELHARD não tem teste."
+    },
+    {
+      "o_que": "As 62 cores da Calculadora ao alcance de um tema, como custom property",
+      "estado": "mudou",
+      "evidencia": "src/calculadora.scss:8-73 (--calc-*), com os mesmos 62 valores que tinha antes, dentro do RoqueOS; a troca de prefixo está registrada no diff de integração ao sair do núcleo. Sem teste.",
+      "nota": "As cores continuam custom property com os mesmos valores, mas o prefixo interno do RoqueOS virou --calc-*, o nome do repo próprio. O tema padrão não redefinia essas cores, então nenhuma cor muda hoje; perde-se só o nome que um tema futuro do RoqueOS poderia mirar."
+    },
+    {
+      "o_que": "Borda dos chips SCI e histórico na cor do tema",
+      "estado": "mantida",
+      "evidencia": "src/calculadora.scss:271 usa var(--ros-border-dim), a variável do contrato do app-sdk; antes, dentro do RoqueOS, a mesma borda usava uma variável Sass interna que, compilada, virava a mesma var(--ros-border-dim) em tempo de execução: o valor lido é o mesmo antes e depois. Sem teste."
+    },
+    {
+      "o_que": "Textos da tela nos dez idiomas",
+      "estado": "mantida",
+      "testes": [
+        "test/Calculadora.spec.js › shows the texts it received, and the history button has its label",
+        "test/app.spec.js › monta com o texto no idioma do sistema, e só depois de o texto chegar",
+        "test/app.spec.js › troca o texto quando o idioma muda com a janela aberta",
+        "test/app.spec.js › duas trocas seguidas: vale a última, mesmo que a primeira chegue depois"
+      ],
+      "evidencia": "i18n/<idioma>.json:2-6 nos dez idiomas, com os mesmos valores que tinha antes, dentro do RoqueOS (conferido por script). Os testes cobrem pt-BR, ja-JP, en-US e de-DE."
+    },
+    {
+      "o_que": "Troca de idioma com a janela aberta",
+      "estado": "mantida",
+      "testes": [
+        "test/app.spec.js › troca o texto quando o idioma muda com a janela aberta",
+        "test/app.spec.js › duas trocas seguidas: vale a última, mesmo que a primeira chegue depois",
+        "test/troca-de-idioma.spec.js › vale o último idioma pedido, mesmo que a resposta dele chegue antes"
+      ],
+      "evidencia": "src/index.js:21-35, que fala com o sistema de idioma do RoqueOS; antes o vue-i18n do RoqueOS, reativo. Idioma fora dos dez cai no pt-BR (src/textos.js:36)."
+    },
+    {
+      "o_que": "Árabe: teclado e visor continuam da esquerda para a direita",
+      "estado": "mantida",
+      "testes": [
+        "test/Calculadora.spec.js › keeps the keypad left to right even in a right-to-left language"
+      ],
+      "evidencia": "src/Calculadora.vue:4 põe dir=\"ltr\" na raiz. Antes a raiz não tinha esse atributo e ficava da esquerda para a direita porque o RoqueOS não aplica RTL ao documento (achado de 27/09); agora é garantido. O comentário do teste diz que o RoqueOS põe dir=rtl, o que contradiz esse achado. Não medido na tela em árabe."
+    },
+    {
+      "o_que": "Id permanente calculator: janelas, atalhos e preferências de quem já usa continuam valendo",
+      "estado": "mantida",
+      "testes": [
+        "test/app.spec.js › o id do app é o do manifesto, que é o id permanente de sempre"
+      ],
+      "evidencia": "app.json:2 e src/index.js:15; antes, o mesmo id no registro de apps do RoqueOS (diff de integração, linha 108). O componente de antes continua sendo a chave do carregador do RoqueOS."
+    },
+    {
+      "o_que": "Nome no Dock, Launchpad, Spotlight e Ajustes nos dez idiomas",
+      "estado": "mantida",
+      "evidencia": "O registro de apps do RoqueOS leva o nameKey do app.json, e cai para a tradução padrão quando o id não está no mapa (diff de integração, linhas 9 e 28); app.json:5-16 tem os mesmos dez nomes que tinha antes, dentro do RoqueOS; nomes medidos em produção no QA \"nomes 7\" desde a Onda 3 (veredicto G8, 28/09). O teste desse fallback é do RoqueOS, não do repo do app."
+    },
+    {
+      "o_que": "Descrição \"Calculadora científica\" na Big Picture",
+      "estado": "mudou",
+      "evidencia": "app.json:17-28; o registro gerado leva a descrição do app.json (veredicto G8); antes, o registro de descrições do RoqueOS (diff de integração, linhas 138, 179, 220, 261, 302, 343, 384, 437, 478 e 531). Sem teste no repo; a Big Picture não foi medida na tela.",
+      "nota": "A descrição agora vem do app.json, traduzida nos dez idiomas; antes, oito idiomas (ar, de, es, fr, hi, ja, ru, zh) mostravam \"Scientific Calculator\" em inglês. Melhora, sem perda."
+    },
+    {
+      "o_que": "Ícone calculate laranja (#ff9500), categoria produtividade, listada na Loja",
+      "estado": "mantida",
+      "evidencia": "app.json:29-31 (icone, cor, categoria); o registro de apps do RoqueOS leva icon, color, category e showInStore (veredicto G8, 28/09); antes, diff de integração, linhas 111-115. O app.json v1 não tem showInStore: o valor vem do registro do RoqueOS. O ícone laranja na Launchpad e na mesa não foi medido na tela."
+    },
+    {
+      "o_que": "Janela de 380×680, mínimo 300×540, sem maximizar",
+      "estado": "mantida",
+      "evidencia": "app.json:32-38; o registro gerado leva windowConfig com size 380×680, minSize 300×540 e isMaximizable false, conferido para a Calculadora (veredicto G8, 28/09); antes diff de integração, linhas 118-121. Abrir a janela sem estado salvo e tentar encolher abaixo do mínimo não foi medido na tela."
+    },
+    {
+      "o_que": "Pré-carga em segundo plano",
+      "estado": "mantida",
+      "evidencia": "O pré-carregador de apps do RoqueOS continua trazendo a Calculadora na fila secundária (diff de integração, linhas 68-69 e 77-78; veredicto G9, 28/09). O JSON de texto não é pré-carregado, e antes o arquivo de texto também era carregado sob demanda. Sem teste; não medido na rede."
+    },
+    {
+      "o_que": "Abrir a Calculadora: carregando e erro",
+      "estado": "mudou",
+      "testes": [
+        "test/app.spec.js › monta com o texto no idioma do sistema, e só depois de o texto chegar",
+        "test/app.spec.js › desmontar antes do texto chegar não monta nada depois",
+        "test/Calculadora.spec.js › without texts yet, shows no label instead of the raw key"
+      ],
+      "evidencia": "src/index.js:37-45 monta no finally, mesmo com falha do texto; src/textos.js:48-52 devolve rótulo vazio sem texto; a janela do RoqueOS mostra o erro genérico do sistema se o mount lançar. Antes, o sistema do RoqueOS que juntava texto ao componente (diff de integração, linha 48). Não medido offline na primeira abertura nem com o pedaço do JSON bloqueado.",
+      "nota": "Antes, o sistema do RoqueOS que juntava o texto ao componente fazia isso, e a falha do texto virava a tela de erro do app. Hoje o app espera o JSON do idioma com a janela vazia e, se ele falhar, monta mesmo assim, com os rótulos de texto vazios (título e botão Limpar do histórico, estado vazio, \"powered by\"); a conta funciona, porque as teclas são símbolos. Se o mount lançar, a janela mostra o erro genérico do sistema, sem tentar de novo."
+    },
+    {
+      "o_que": "Estado exposto para testes e integrações (defineExpose)",
+      "estado": "mudou",
+      "testes": [
+        "test/Calculadora.spec.js › records and recalls history",
+        "test/Calculadora.spec.js › toggles scientific mode"
+      ],
+      "evidencia": "src/Calculadora.vue:534-535, igual ao componente de antes, dentro do RoqueOS; src/index.js:43 cria um app Vue próprio. Nenhum consumidor da instância aparece no diff de integração.",
+      "nota": "Continua exposto, e os testes da tela usam; mas o núcleo do RoqueOS não alcança mais a instância, porque a Calculadora roda num app Vue próprio."
+    },
+    {
+      "o_que": "Acessibilidade: SCI com aria-pressed, histórico com aria-label, decoração escondida do leitor de tela",
+      "estado": "mantida",
+      "testes": [
+        "test/Calculadora.spec.js › shows the texts it received, and the history button has its label"
+      ],
+      "evidencia": "src/Calculadora.vue:6, 13, 22, 30, 33 e 54, iguais ao componente de antes, dentro do RoqueOS (o SVG novo também tem aria-hidden). O teste confere o aria-label; aria-pressed e aria-hidden não têm teste. A dívida é a mesma antes e depois: teclas sem nome acessível (⌫, ±, x², √), visor sem aria-live, gaveta sem foco preso."
+    }
+  ]
+}

@@ -3,6 +3,19 @@
 O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/), e o projeto
 usa [versionamento semântico](https://semver.org/lang/pt-BR/).
 
+## [0.1.1] - 2026-09-28
+
+A auditoria de paridade de 28/09/2026 (Goal 28): o founder pediu que nenhuma funcionalidade
+se perdesse na saída do núcleo.
+
+### Adicionado
+
+- `paridade.json`: o inventário do que a Calculadora fazia dentro do RoqueOS, item por item, e o
+  que aconteceu com cada coisa na saída (63 itens: 54 mantidas, 9 mudaram, 0 perdidas). Cada
+  item cita o teste deste repo que o prova, ou a evidência, e o RoqueOS confere o arquivo no
+  pacote instalado: teste citado que não existe mais, estado de dúvida ou perda sem decisão
+  escrita reprovam. O arquivo vai no pacote (`files`).
+
 ## [0.1.0] - 2026-09-27
 
 ### Adicionado
