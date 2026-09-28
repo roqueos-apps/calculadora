@@ -10,7 +10,7 @@ teclado físico quando a janela está ativa, e a carcaça pega a luz conforme o 
 
 Use de graça em [roqueos.com.br](https://roqueos.com.br), no computador, no celular e na TV.
 
-![A Calculadora do RoqueOS numa janela: 42 ÷ 6 no visor, com a prévia do resultado em cima](docs/capa.jpg)
+![A Calculadora do RoqueOS numa janela: uma calculadora científica grafite com painel de alumínio, 42 ÷ 6 na matriz de pontos do visor e o 7 em sete segmentos embaixo](docs/capa.jpg)
 
 _English below._
 

@@ -13,7 +13,7 @@ O único desenho de terceiro é o ícone do histórico, o `history` do
 `src/Calculadora.vue`. O ícone da janela e da Launchpad é o `calculate` do Material Icons,
 desenhado pelo RoqueOS a partir do nome no `app.json`.
 
-A capa do README (`docs/capa.jpg`) é um print do app dentro do RoqueOS (build 2579 do front, em
-pt-BR), tirado com o Playwright numa sessão de teste com conteúdo de exemplo, em 28/09/2026;
+A capa do README (`docs/capa.jpg`) é um print do app dentro do RoqueOS (build 2581 do front, com a
+0.2.0, em pt-BR), tirado com o Playwright numa sessão de teste com conteúdo de exemplo, em 28/09/2026;
 autoral, MIT como o resto do repo. Ela não vai no pacote que o RoqueOS instala (o `files` do
 `package.json` não leva `docs/`).
