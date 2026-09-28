@@ -215,7 +215,9 @@
       var(--calc-painel-2) 58%,
       var(--calc-painel-3) 100%
     );
+  // a placa encaixada na carcaça: uma fresta escura em volta
   box-shadow:
+    0 0 0 0.35cqw var(--calc-contorno),
     inset 0 1px 0 var(--calc-painel-luz),
     inset 0 -1px 0 var(--calc-painel-sombra),
     0 0.6cqw 1.2cqw var(--calc-painel-sombra-fora);

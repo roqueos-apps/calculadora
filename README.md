@@ -2,9 +2,11 @@
 
 A calculadora científica do [RoqueOS](https://roqueos.com.br): quatro operações com
 precedência, potência, raiz, fatorial, porcentagem, trigonometria em graus ou radianos,
-logaritmos, memória (MC, MR, M+, M−) e histórico. Aceita o teclado físico quando a janela está
-ativa, e a carcaça pega a luz conforme o aparelho inclina (ou o ponteiro passa), a não ser que
-o sistema peça o perfil leve. Nos dez idiomas do RoqueOS.
+logaritmos, memória (MC, MR, M+, M−) e histórico. Tem a cara de uma calculadora de engenharia
+dos anos 2000: visor de cristal líquido de duas linhas (a conta em matriz de pontos, o valor em
+sete segmentos), painel de alumínio escovado, células solares e teclas que afundam. Aceita o
+teclado físico quando a janela está ativa, e a carcaça pega a luz conforme o aparelho inclina
+(ou o ponteiro passa), a não ser que o sistema peça o perfil leve. Nos dez idiomas do RoqueOS.
 
 Use de graça em [roqueos.com.br](https://roqueos.com.br), no computador, no celular e na TV.
 
@@ -30,9 +32,13 @@ flowchart LR
   end
   C[Calculadora<br/>Calculadora.vue]
   M[motor.js<br/>a conta, funções puras]
+  V[Visor.vue<br/>o cristal líquido]
+  G[visor/matriz.js e visor/segmentos.js<br/>a geometria, funções puras]
   T[teclado físico<br/>só com a janela ativa]
   H -- sistema --> C
   C --> M
+  C -- conta e valor --> V
+  V --> G
   T --> C
 ```
 
@@ -42,14 +48,29 @@ app.json            quem ela é: id permanente (calculator), nome e descrição 
 i18n/<idioma>.json  os textos da tela, um arquivo por idioma
 src/
   index.js          definirApp: cria o app Vue próprio dentro do elemento que o RoqueOS dá
-  Calculadora.vue   a tela, a entrada e o histórico
+  Calculadora.vue   a carcaça, o teclado, a entrada e o histórico
+  Visor.vue         o visor de duas linhas: indicadores, matriz de pontos e sete segmentos
+  visor/matriz.js   a fonte 5 × 7 desenhada aqui e o recorte da linha de cima
+  visor/segmentos.js os sete segmentos: o texto do motor nas células e a geometria
   motor.js          a conta: fichas, notação polonesa reversa e avaliação, funções puras
   textos.js         carrega o JSON do idioma (com ?raw) e traduz uma chave
   useInclinacao.js  o reflexo que segue o sensor ou o ponteiro
-  calculadora.scss  o visual
+  calculadora.scss  a carcaça e as teclas, tudo em cqw da carcaça
+  visor.scss        o cristal líquido
 dev/main.js         o yarn dev: a Calculadora numa janela falsa do RoqueOS
-test/               Vitest: a tela, o app pelo SDK, a troca de idioma, o motor e o reflexo
+test/               Vitest: a tela, o visor, as duas geometrias, o app pelo SDK, a troca de
+                    idioma, o motor e o reflexo
 ```
+
+### O visor
+
+Como o de uma calculadora de verdade, o desenho do visor é fixo: dezesseis caracteres de 5 × 7
+pontos em cima e, embaixo, o sinal à parte, treze células de sete segmentos e o expoente
+pequeno de três dígitos com o "×10". Treze células porque é o que o `fmt` do motor escreve de
+mais comprido ("0." e doze casas); nada encolhe e nada corta. O que está apagado fica
+fantasma, fraco, como no cristal líquido, e a conta longa mostra o fim, com a seta ◀ acesa. O
+texto de verdade das duas linhas fica legível para o leitor de tela e para os testes; o
+desenho é SVG, sem fonte de arquivo.
 
 ### Como ela fala com o RoqueOS
 
@@ -57,13 +78,13 @@ Só pelo `sistema` do SDK:
 
 - `idioma`: o texto desce no idioma de quem usa e troca com a janela aberta (a última troca
   pedida vence);
-- `desempenho.modoLeve()`: no aparelho fraco o reflexo não liga;
+- `desempenho.modoLeve()`: no aparelho fraco não ligam o reflexo, o grão, a textura escovada
+  nem o cursor piscando;
 - `ativar(ativo)` da montagem: o teclado físico só vale com a janela ativa.
 
-Ela não grava nada, não fala com servidor nem com banco, e não pede capacidade opcional. Do
-tema do RoqueOS usa seis variáveis CSS do contrato do SDK (`--ros-white-rgb`,
-`--ros-black-rgb`, `--ros-border-dim`, `--ros-text-100`, `--ros-shadow-30`,
-`--ros-shadow-50`); as cores dela são `--calc-*`, dela.
+Ela não grava nada, não fala com servidor nem com banco, e não pede capacidade opcional. Não
+lê cor do tema do RoqueOS: é um objeto, igual no tema claro e no escuro, e as cores dela são
+`--calc-*`, dela.
 
 ## Pré-requisitos
 
@@ -109,17 +130,20 @@ e não fazem parte da licença.
 
 The scientific calculator of [RoqueOS](https://roqueos.com.br): the four operations with
 precedence, powers, roots, factorial, percent, trigonometry in degrees or radians, logarithms,
-memory and history, in all ten RoqueOS languages. It accepts the physical keyboard while its
-window is active, and its case catches the light as the device tilts (or the pointer moves),
-unless the system asks for the light profile.
+memory and history, in all ten RoqueOS languages. It looks like a 2000s engineering
+calculator: a two-line liquid crystal display (the expression in a dot matrix, the value in
+seven segments, with the ghost of the unlit segments), a brushed aluminium panel, solar cells
+and keys that sink when pressed, all drawn in SVG and CSS with no image or font file. It
+accepts the physical keyboard while its window is active, and its case catches the light as
+the device tilts (or the pointer moves), unless the system asks for the light profile.
 
 It was born inside RoqueOS, which is closed source, and on 27/09/2026 became the first app to
 move to its own open repository under MIT, in the
 [roqueos-apps](https://github.com/roqueos-apps) organization. RoqueOS installs it by tag as a
 git dependency, and it talks to RoqueOS only through the `sistema` of
 [`@roqueos-apps/app-sdk`](https://github.com/roqueos-apps/app-sdk) (language, light profile,
-active window). It stores nothing, calls no server or database, and uses six theme CSS
-variables from the SDK contract.
+active window). It stores nothing, calls no server or database, and reads no color from the
+RoqueOS theme.
 
 Run `yarn install --ignore-scripts`, then `yarn dev` to open it in a fake RoqueOS window with
 a language picker, or `yarn verificar` to run what CI runs. Every commit must be signed off
