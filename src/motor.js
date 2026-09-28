@@ -9,7 +9,12 @@ const PREC = { '+': 2, '−': 2, '×': 3, '÷': 3, '^': 4 }
 const RIGHT = { '^': true }
 const NEG_PREC = 3.5
 
-export function tokenize(s) {
+export function tokenize(texto) {
+  // O número que a própria Calculadora escreve volta para a conta: o `fmt` dá o sinal com o
+  // hífen ASCII ("-6") e a notação científica com "e+" ("7.055079e+190"). Sem isto, seguir a
+  // conta a partir de um resultado negativo perdia o sinal (-6, "+ 1", dava 7) e a partir de
+  // um resultado em notação científica dava Error (28/09/2026).
+  const s = String(texto).replace(/-/g, '−')
   const tk = []
   let i = 0
   const isD = (c) => c >= '0' && c <= '9'
@@ -25,6 +30,13 @@ export function tokenize(s) {
       while (i < s.length && (isD(s[i]) || s[i] === '.')) {
         n += s[i]
         i++
+      }
+      // Expoente só com sinal e dígito ("e+15", "e−7"): "2e" sozinho continua sendo 2 e a
+      // constante e, e a tela nunca escreve "2e5".
+      const exp = s.slice(i).match(/^e([+−])(\d+)/)
+      if (exp) {
+        n += 'e' + (exp[1] === '−' ? '-' : '+') + exp[2]
+        i += exp[0].length
       }
       tk.push({ t: 'num', v: parseFloat(n) })
       continue

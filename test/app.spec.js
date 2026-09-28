@@ -14,8 +14,7 @@ const montar = ({ idioma = 'pt-BR', ativo = true, modoLeve = false } = {}) => {
   const montagem = calculadora.mount(el, falso.sistema, { windowId: 'w1', ativo })
   return { ...falso, el, montagem }
 }
-const rotuloDoHistorico = (el) =>
-  el.querySelectorAll('.ros-calc__chip')[1]?.getAttribute('aria-label') ?? null
+const rotuloDoHistorico = (el) => el.querySelector('.key--hist')?.getAttribute('aria-label') ?? null
 // O texto desce por `import()` do JSON do idioma: mais que uma volta de microtarefa.
 const montou = (el) => vi.waitFor(() => expect(el.querySelector('.ros-calc')).not.toBeNull())
 const rotuloVira = (el, texto) => vi.waitFor(() => expect(rotuloDoHistorico(el)).toBe(texto))

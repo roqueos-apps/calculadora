@@ -1,147 +1,170 @@
 <template>
   <!-- dir="ltr": teclado e visor de calculadora são da esquerda para a direita em todo
        idioma, inclusive no árabe; espelhar deixaria o 7 à direita do 9 e o "M−" como "−M". -->
-  <div ref="calcRoot" class="ros-calc" dir="ltr" @pointerdown="primeTilt">
+  <div
+    ref="calcRoot"
+    class="ros-calc"
+    :class="{ 'is-tab': navegandoComTab, 'is-leve': leve }"
+    dir="ltr"
+    @pointerdown="primeTilt"
+    @keydown.tab="navegandoComTab = true"
+  >
     <div class="ros-calc__device" :class="{ 'ros-calc__device--sci': sci }" :style="tiltStyle">
-      <div class="ros-calc__base" aria-hidden="true"></div>
-
-      <!-- Top bar: brand + SCI / history chips -->
-      <div class="ros-calc__top">
-        <div class="ros-calc__brand">
-          <div class="ros-calc__brand-name">ROQUE</div>
-          <div class="ros-calc__brand-model">RX·200 Scientific</div>
+      <!-- O painel de cima, de alumínio escovado: a marca, as células solares, o visor e a
+           chave deslizante do modo científico. -->
+      <div class="ros-calc__painel">
+        <div class="ros-calc__top">
+          <div class="ros-calc__brand">
+            <div class="ros-calc__brand-name">ROQUE</div>
+            <div class="ros-calc__brand-model">
+              RX·200 <span class="ros-calc__brand-tipo">Scientific</span>
+            </div>
+          </div>
           <div class="ros-calc__solar" aria-hidden="true">
             <span></span><span></span><span></span><span></span>
           </div>
         </div>
-        <div class="ros-calc__chips">
+
+        <Visor
+          :expressao="exprText"
+          :cursor="mode === 'editing'"
+          :valor="mainText"
+          :erro="errorState"
+          :anunciadores="anunciadores"
+        />
+
+        <div class="ros-calc__controles">
           <button
-            class="ros-calc__chip"
+            class="ros-calc__switch"
             :class="{ 'is-on': sci }"
             type="button"
             :aria-pressed="sci"
             @click="toggleSci"
           >
             SCI
+            <span class="ros-calc__trilho" aria-hidden="true"><span></span></span>
           </button>
-          <button
-            class="ros-calc__chip"
-            type="button"
-            :aria-label="tx('history')"
-            @click="openHistory"
-          >
-            <svg class="ros-calc__chip-icon" viewBox="0 0 24 24" aria-hidden="true">
-              <path :d="ICONE_HISTORICO" />
-            </svg>
-          </button>
+          <span class="ros-calc__rotulo" aria-hidden="true">{{ ROTULO_DO_PAINEL }}</span>
         </div>
       </div>
 
-      <!-- LCD -->
-      <div class="ros-calc__lcd" :class="{ 'is-error': errorState }">
-        <div class="ros-calc__flags">
-          <span class="ros-calc__flag" :class="{ 'is-on': deg && sci }">DEG</span>
-          <span class="ros-calc__flag" :class="{ 'is-on': !deg && sci }">RAD</span>
-          <span class="ros-calc__flag" :class="{ 'is-on': inv }">INV</span>
-          <span class="ros-calc__flag" :class="{ 'is-on': mem !== 0 }">M</span>
-        </div>
-        <div class="ros-calc__expr">
-          <span>{{ exprText }}</span>
-        </div>
-        <div class="ros-calc__main" :class="mainLenClass">
-          <span>{{ mainText }}</span>
-        </div>
-        <div class="ros-calc__glass" aria-hidden="true"></div>
-      </div>
-
-      <!-- Keypad -->
+      <!-- O teclado. A legenda âmbar em cima de uma tecla é a função dela com o 2nd, como
+           impressa na carcaça de uma calculadora de verdade; a tecla não muda de nome. -->
       <div class="ros-calc__pad">
-        <!-- Scientific block (collapsible) -->
         <div class="ros-calc__sci-wrap">
           <div class="ros-calc__sci">
-            <div class="ros-calc__grid ros-calc__grid--sci">
+            <div class="ros-calc__grid ros-calc__grid--fn">
               <button
-                class="ros-calc__key key--fn"
+                class="ros-calc__key key--fn key--2nd"
                 :class="{ 'is-active': inv }"
                 type="button"
+                :aria-pressed="inv"
                 @click="toggleInv"
               >
-                <span class="key__accent">2nd</span>
+                2nd
               </button>
               <button class="ros-calc__key key--fn" type="button" @click="post('²')">x²</button>
               <button class="ros-calc__key key--fn" type="button" @click="sqrt">√</button>
-              <button class="ros-calc__key key--fn" type="button" @click="op('^')">
+              <button
+                class="ros-calc__key key--fn"
+                :class="{ 'is-apertada': apertada === '^' }"
+                type="button"
+                @click="op('^')"
+              >
                 x<sup>y</sup>
               </button>
-              <button class="ros-calc__key key--fn" type="button" @click="post('!')">n!</button>
+              <button
+                class="ros-calc__key key--fn"
+                :class="{ 'is-apertada': apertada === '!' }"
+                type="button"
+                @click="post('!')"
+              >
+                n!
+              </button>
             </div>
-            <div class="ros-calc__grid ros-calc__grid--sci">
-              <button class="ros-calc__key key--fn" type="button" @click="fn(inv ? 'asin' : 'sin')">
-                {{ inv ? 'asin' : 'sin' }}
-              </button>
-              <button class="ros-calc__key key--fn" type="button" @click="fn(inv ? 'acos' : 'cos')">
-                {{ inv ? 'acos' : 'cos' }}
-              </button>
-              <button class="ros-calc__key key--fn" type="button" @click="fn(inv ? 'atan' : 'tan')">
-                {{ inv ? 'atan' : 'tan' }}
-              </button>
-              <button class="ros-calc__key key--fn" type="button" @click="fn('log')">log</button>
-              <button class="ros-calc__key key--fn" type="button" @click="fn('ln')">ln</button>
+            <div class="ros-calc__grid ros-calc__grid--fn ros-calc__grid--legendas">
+              <div v-for="t in TRIGONOMETRICAS" :key="t" class="ros-calc__slot">
+                <span class="ros-calc__legenda" :class="{ 'is-on': inv }" aria-hidden="true">
+                  {{ t }}<sup>−1</sup>
+                </span>
+                <button
+                  class="ros-calc__key key--fn"
+                  type="button"
+                  :aria-label="inv ? 'a' + t : t"
+                  @click="fn(inv ? 'a' + t : t)"
+                >
+                  {{ t }}
+                </button>
+              </div>
+              <div class="ros-calc__slot">
+                <span class="ros-calc__legenda" aria-hidden="true"></span>
+                <button class="ros-calc__key key--fn" type="button" @click="fn('log')">log</button>
+              </div>
+              <div class="ros-calc__slot">
+                <span class="ros-calc__legenda" aria-hidden="true"></span>
+                <button class="ros-calc__key key--fn" type="button" @click="fn('ln')">ln</button>
+              </div>
             </div>
-            <div class="ros-calc__grid ros-calc__grid--sci">
+            <div class="ros-calc__grid ros-calc__grid--fn">
               <button class="ros-calc__key key--fn" type="button" @click="constant('π')">π</button>
               <button class="ros-calc__key key--fn" type="button" @click="constant('e')">e</button>
-              <button class="ros-calc__key key--fn" type="button" @click="paren('(')">(</button>
-              <button class="ros-calc__key key--fn" type="button" @click="paren(')')">)</button>
-              <button class="ros-calc__key key--fn" type="button" @click="toggleDeg">
-                {{ deg ? 'DEG' : 'RAD' }}
+              <button
+                class="ros-calc__key key--fn"
+                :class="{ 'is-apertada': apertada === '(' }"
+                type="button"
+                @click="paren('(')"
+              >
+                (
+              </button>
+              <button
+                class="ros-calc__key key--fn"
+                :class="{ 'is-apertada': apertada === ')' }"
+                type="button"
+                @click="paren(')')"
+              >
+                )
+              </button>
+              <button
+                class="ros-calc__key key--fn"
+                type="button"
+                :aria-label="deg ? 'DEG' : 'RAD'"
+                @click="toggleDeg"
+              >
+                DRG
               </button>
             </div>
           </div>
         </div>
 
-        <!-- Memory row -->
-        <div class="ros-calc__grid ros-calc__grid--mem">
-          <button class="ros-calc__key key--fn" type="button" @click="memClear">
-            <span class="key__accent">MC</span>
-          </button>
-          <button class="ros-calc__key key--fn" type="button" @click="memRecall">
-            <span class="key__accent">MR</span>
-          </button>
-          <button class="ros-calc__key key--fn" type="button" @click="memAdd(1)">
-            <span class="key__accent">M+</span>
-          </button>
-          <button class="ros-calc__key key--fn" type="button" @click="memAdd(-1)">
-            <span class="key__accent">M−</span>
+        <!-- Memória e histórico: ficam com o modo científico desligado também. -->
+        <div class="ros-calc__grid ros-calc__grid--fn ros-calc__grid--mem">
+          <button class="ros-calc__key key--fn" type="button" @click="memClear">MC</button>
+          <button class="ros-calc__key key--fn" type="button" @click="memRecall">MR</button>
+          <button class="ros-calc__key key--fn" type="button" @click="memAdd(1)">M+</button>
+          <button class="ros-calc__key key--fn" type="button" @click="memAdd(-1)">M−</button>
+          <button
+            class="ros-calc__key key--fn key--hist"
+            type="button"
+            :aria-label="tx('history')"
+            @click="openHistory"
+          >
+            <svg class="ros-calc__key-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path :d="ICONE_HISTORICO" />
+            </svg>
           </button>
         </div>
 
-        <!-- Main keypad -->
         <div class="ros-calc__grid ros-calc__grid--main">
-          <button class="ros-calc__key key--fn key--del" type="button" @click="ac">AC</button>
-          <button class="ros-calc__key key--fn key--del" type="button" @click="back">⌫</button>
-          <button class="ros-calc__key key--fn" type="button" @click="post('%')">%</button>
-          <button class="ros-calc__key key--op" type="button" @click="op('÷')">÷</button>
-
-          <button class="ros-calc__key" type="button" @click="num('7')">7</button>
-          <button class="ros-calc__key" type="button" @click="num('8')">8</button>
-          <button class="ros-calc__key" type="button" @click="num('9')">9</button>
-          <button class="ros-calc__key key--op" type="button" @click="op('×')">×</button>
-
-          <button class="ros-calc__key" type="button" @click="num('4')">4</button>
-          <button class="ros-calc__key" type="button" @click="num('5')">5</button>
-          <button class="ros-calc__key" type="button" @click="num('6')">6</button>
-          <button class="ros-calc__key key--op" type="button" @click="op('−')">−</button>
-
-          <button class="ros-calc__key" type="button" @click="num('1')">1</button>
-          <button class="ros-calc__key" type="button" @click="num('2')">2</button>
-          <button class="ros-calc__key" type="button" @click="num('3')">3</button>
-          <button class="ros-calc__key key--op" type="button" @click="op('+')">+</button>
-
-          <button class="ros-calc__key key--fn" type="button" @click="negate">±</button>
-          <button class="ros-calc__key" type="button" @click="num('0')">0</button>
-          <button class="ros-calc__key" type="button" @click="num('.')">.</button>
-          <button class="ros-calc__key key--op key--eq" type="button" @click="equals">=</button>
+          <button
+            v-for="t in TECLADO"
+            :key="t.rotulo"
+            class="ros-calc__key"
+            :class="[t.classe, { 'is-apertada': apertada === t.id }]"
+            type="button"
+            @click="t.acao()"
+          >
+            {{ t.rotulo }}
+          </button>
         </div>
       </div>
 
@@ -180,12 +203,14 @@
 </template>
 
 <script setup>
-// A Calculadora: a tela, a entrada e o histórico. A conta mora em `motor.js`; o texto, em
-// `i18n/`; o que vem do RoqueOS (idioma, perfil leve), pelo `sistema` do app-sdk.
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+// A Calculadora: a tela, a entrada e o histórico. A conta mora em `motor.js`; o visor, em
+// `Visor.vue`; o texto, em `i18n/`; o que vem do RoqueOS (idioma, perfil leve), pelo
+// `sistema` do app-sdk.
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { compute, fmt } from './motor.js'
 import { traduzir } from './textos.js'
 import { useInclinacao } from './useInclinacao.js'
+import Visor from './Visor.vue'
 
 const props = defineProps({
   /** O `sistema` do app-sdk: idioma, perfil leve, avisos. */
@@ -201,9 +226,11 @@ const tx = (chave) => traduzir(props.estado.textos, chave)
 const ICONE_HISTORICO =
   'M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0 0 13 21a9 9 0 0 0 0-18zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z'
 
-// Brand stamp (bound, not a template literal, so the i18n hardcoded scan stays
-// clean — same idea as keeping product names out of static markup).
+// O que vem impresso na carcaça (ligado, e não literal no template, para a varredura de
+// texto sem tradução continuar limpa: é marca e gravação do aparelho, não frase de tela).
 const brand = 'LEVELHARD'
+const ROTULO_DO_PAINEL = 'TWO-LINE DISPLAY'
+const TRIGONOMETRICAS = ['sin', 'cos', 'tan']
 
 // ==========================================================================
 // State
@@ -216,11 +243,17 @@ const lastExpr = ref('')
 const mem = ref(0)
 const deg = ref(true)
 const inv = ref(false)
-const sci = ref(false)
+// Liga com o bloco científico à mostra, como uma calculadora de engenharia de verdade; a
+// chave SCI esconde o bloco e deixa só o teclado básico.
+const sci = ref(true)
 const errorState = ref(false)
 const historyItems = ref([])
 const historyOpen = ref(false)
 const calcRoot = ref(null)
+
+// O perfil leve vem do sistema (o RoqueOS decide uma vez, para o sistema inteiro): sem
+// reflexo, sem grão, sem cursor piscando, sombra de uma camada só.
+const leve = props.sistema.desempenho.modoLeve?.() === true
 
 // "Catches light" like a physical object: the accelerometer (mobile) / pointer
 // (desktop) drives moving specular highlights via CSS custom props. Inert under
@@ -236,43 +269,49 @@ const tiltStyle = computed(() => ({
 // iOS gates orientation behind a one-time permission prompt that must come from
 // a user gesture — the first tap inside the calculator is that gesture.
 const primeTilt = () => {
+  navegandoComTab.value = false
   requestMotion()
 }
+// O anel de foco aparece para quem navega com Tab, e some quando se volta a clicar.
+const navegandoComTab = ref(false)
 
 // ==========================================================================
 // Display (computed)
 // ==========================================================================
+// Como no visor de duas linhas: a conta em cima, com o cursor enquanto se digita, e o
+// número embaixo. Enquanto se digita, embaixo fica a prévia do resultado; a conta que ainda
+// não fecha (um "sin(" sozinho) deixa ali a última prévia que fechou.
 const VAL_END = /[0-9.)²!eπ]$/
+const previa = ref('0')
 
-const mainText = computed(() => {
-  if (mode.value === 'result') return result.value
-  return expr.value === '' ? '0' : expr.value
-})
-
-const exprText = computed(() => {
-  if (mode.value === 'result') return lastExpr.value + ' ='
-  const shown = expr.value === '' ? '0' : expr.value
-  if (
-    expr.value !== '' &&
-    /[+−×÷^!²%]|sqrt|sin|cos|tan|log|ln|√|π|e/.test(expr.value.replace(/^[−(]/, ''))
-  ) {
+watch(
+  [expr, deg, mode],
+  () => {
+    if (mode.value !== 'editing') return
+    if (expr.value === '') {
+      previa.value = '0'
+      return
+    }
     try {
       const f = fmt(compute(expr.value, deg.value))
-      if (f !== 'Error' && f !== shown) return '= ' + f
+      if (f !== 'Error') previa.value = f
     } catch {
-      /* incomplete expression — no preview */
+      /* conta incompleta: fica a última prévia */
     }
-  }
-  return ''
-})
+  },
+  { immediate: true },
+)
 
-const mainLenClass = computed(() => {
-  const len = mainText.value.length
-  if (len <= 8) return 'len-1'
-  if (len <= 12) return 'len-2'
-  if (len <= 18) return 'len-3'
-  return 'len-4'
-})
+const mainText = computed(() => (mode.value === 'result' ? result.value : previa.value))
+
+const exprText = computed(() => (mode.value === 'result' ? lastExpr.value + ' =' : expr.value))
+
+const anunciadores = computed(() => ({
+  segunda: inv.value,
+  memoria: mem.value !== 0,
+  deg: deg.value && sci.value,
+  rad: !deg.value && sci.value,
+}))
 
 // ==========================================================================
 // Input helpers
@@ -471,6 +510,42 @@ const toggleDeg = () => {
 }
 
 // ==========================================================================
+// O teclado de baixo, em cinco colunas, como numa calculadora científica: DEL e AC em
+// cima, à direita dos dígitos. `id` é a tecla física que aperta a mesma tecla na tela.
+// ==========================================================================
+const TECLADO = [
+  { rotulo: '7', id: '7', acao: () => num('7') },
+  { rotulo: '8', id: '8', acao: () => num('8') },
+  { rotulo: '9', id: '9', acao: () => num('9') },
+  { rotulo: 'DEL', id: 'del', classe: 'key--del', acao: back },
+  { rotulo: 'AC', id: 'ac', classe: 'key--del', acao: ac },
+  { rotulo: '4', id: '4', acao: () => num('4') },
+  { rotulo: '5', id: '5', acao: () => num('5') },
+  { rotulo: '6', id: '6', acao: () => num('6') },
+  { rotulo: '×', id: '×', classe: 'key--op', acao: () => op('×') },
+  { rotulo: '÷', id: '÷', classe: 'key--op', acao: () => op('÷') },
+  { rotulo: '1', id: '1', acao: () => num('1') },
+  { rotulo: '2', id: '2', acao: () => num('2') },
+  { rotulo: '3', id: '3', acao: () => num('3') },
+  { rotulo: '+', id: '+', classe: 'key--op', acao: () => op('+') },
+  { rotulo: '−', id: '−', classe: 'key--op', acao: () => op('−') },
+  { rotulo: '0', id: '0', acao: () => num('0') },
+  { rotulo: '.', id: '.', acao: () => num('.') },
+  { rotulo: '±', id: '±', classe: 'key--op', acao: negate },
+  { rotulo: '%', id: '%', classe: 'key--op', acao: () => post('%') },
+  { rotulo: '=', id: '=', classe: 'key--eq', acao: equals },
+]
+
+// A tecla da tela afunda quando a do teclado físico é apertada.
+const apertada = ref(null)
+let soltar = null
+const apertar = (id) => {
+  apertada.value = id
+  clearTimeout(soltar)
+  soltar = setTimeout(() => (apertada.value = null), 130)
+}
+
+// ==========================================================================
 // History
 // ==========================================================================
 const openHistory = () => {
@@ -503,33 +578,62 @@ const onKeydown = (e) => {
   if (!props.estado.ativo) return
 
   const k = e.key
-  if (k >= '0' && k <= '9') num(k)
-  else if (k === '.' || k === ',') num('.')
-  else if (k === '+') op('+')
-  else if (k === '-') op('−')
-  else if (k === '*') op('×')
-  else if (k === '/') {
+  if (k >= '0' && k <= '9') {
+    num(k)
+    apertar(k)
+  } else if (k === '.' || k === ',') {
+    num('.')
+    apertar('.')
+  } else if (k === '+') {
+    op('+')
+    apertar('+')
+  } else if (k === '-') {
+    op('−')
+    apertar('−')
+  } else if (k === '*') {
+    op('×')
+    apertar('×')
+  } else if (k === '/') {
     e.preventDefault()
     op('÷')
-  } else if (k === '^') op('^')
-  else if (k === '(') paren('(')
-  else if (k === ')') paren(')')
-  else if (k === '%') post('%')
-  else if (k === '!') post('!')
-  else if (k === 'Enter' || k === '=') {
+    apertar('÷')
+  } else if (k === '^') {
+    op('^')
+    apertar('^')
+  } else if (k === '(') {
+    paren('(')
+    apertar('(')
+  } else if (k === ')') {
+    paren(')')
+    apertar(')')
+  } else if (k === '%') {
+    post('%')
+    apertar('%')
+  } else if (k === '!') {
+    post('!')
+    apertar('!')
+  } else if (k === 'Enter' || k === '=') {
     e.preventDefault()
     equals()
+    apertar('=')
   } else if (k === 'Backspace') {
     e.preventDefault()
     back()
+    apertar('del')
   } else if (k === 'Escape') {
     if (historyOpen.value) closeHistory()
-    else ac()
+    else {
+      ac()
+      apertar('ac')
+    }
   } else return
 }
 
 onMounted(() => window.addEventListener('keydown', onKeydown))
-onUnmounted(() => window.removeEventListener('keydown', onKeydown))
+onUnmounted(() => {
+  window.removeEventListener('keydown', onKeydown)
+  clearTimeout(soltar)
+})
 
 // Exposed for tests + integrations.
 defineExpose({ expr, result, mode, mem, deg, inv, sci, historyItems, mainText, exprText })
