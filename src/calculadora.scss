@@ -160,9 +160,11 @@
     0 8cqw 14cqw -6cqw var(--calc-sombra-longe);
   transition: height 0.32s cubic-bezier(0.22, 0.9, 0.3, 1);
 }
+// No básico a carcaça é mais baixa, e numa janela alta as teclas crescem até ficarem
+// quadradas, em vez de sobrar uma faixa vazia em volta.
 .ros-calc__device:not(.ros-calc__device--sci) {
   --razao-min: 1.24;
-  --razao-max: 1.42;
+  --razao-max: 1.6;
 }
 .ros-calc__device::before {
   // A luz que corre pelo plástico moldado, deslocada pela inclinação (useInclinacao).
