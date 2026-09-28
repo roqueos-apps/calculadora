@@ -8,6 +8,8 @@ o sistema peça o perfil leve. Nos dez idiomas do RoqueOS.
 
 Use de graça em [roqueos.com.br](https://roqueos.com.br), no computador, no celular e na TV.
 
+![A Calculadora do RoqueOS numa janela: 42 ÷ 6 no visor, com a prévia do resultado em cima](docs/capa.jpg)
+
 _English below._
 
 ## Por que existe como repo
@@ -20,6 +22,19 @@ dependência git, e ela fala com ele só pelo
 sozinho no navegador (`yarn dev`) e no teste, sem saber em qual dos três está.
 
 ## Arquitetura
+
+```mermaid
+flowchart LR
+  subgraph RoqueOS
+    H[Sistema do app-sdk<br/>idioma, desempenho]
+  end
+  C[Calculadora<br/>Calculadora.vue]
+  M[motor.js<br/>a conta, funções puras]
+  T[teclado físico<br/>só com a janela ativa]
+  H -- sistema --> C
+  C --> M
+  T --> C
+```
 
 ```text
 app.json            quem ela é: id permanente (calculator), nome e descrição nos dez idiomas,
