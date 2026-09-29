@@ -9,8 +9,8 @@ import { criarSistemaFalso } from '@roqueos-apps/app-sdk/sistema-falso'
 import Calculadora from '../src/Calculadora.vue'
 import ptBR from '../i18n/pt-BR.json'
 
-const mountCalc = ({ ativo = true, textos = ptBR } = {}) => {
-  const { sistema } = criarSistemaFalso({ appId: 'calculator' })
+const mountCalc = ({ ativo = true, textos = ptBR, modoLeve = false } = {}) => {
+  const { sistema } = criarSistemaFalso({ appId: 'calculator', modoLeve })
   const estado = reactive({ ativo, idioma: 'pt-BR', textos })
   const wrapper = mount(Calculadora, { props: { sistema, estado } })
   return Object.assign(wrapper, { estado })
@@ -23,6 +23,8 @@ const click = async (wrapper, text) => {
   await button.trigger('click')
 }
 const main = (wrapper) => wrapper.find('.ros-calc__main').text()
+const cima = (wrapper) => wrapper.find('.ros-calc__expr').text()
+const anunciador = (wrapper, nome) => wrapper.findAll('.lcd__anunc').find((a) => a.text() === nome)
 
 describe('Calculadora', () => {
   it('keeps the keypad left to right even in a right-to-left language', () => {
@@ -37,8 +39,8 @@ describe('Calculadora', () => {
     // próprio, a carcaça saía cortada nas bordas no `yarn dev`.
     const scss = readFileSync('src/calculadora.scss', 'utf8')
     const raiz = scss.slice(
-      scss.indexOf('.ros-calc {\n  --body-1'),
-      scss.indexOf('// ----', scss.indexOf('--body-1')),
+      scss.indexOf('.ros-calc {\n  --calc-corpo-1'),
+      scss.indexOf('.ros-calc {', scss.indexOf('--calc-corpo-1')),
     )
     expect(raiz).toContain('box-sizing: border-box;')
     expect(scss).toMatch(
@@ -122,8 +124,9 @@ describe('Calculadora', () => {
     await click(w, '1')
     await click(w, '2')
     await click(w, '3')
-    await click(w, '⌫')
+    await click(w, 'DEL')
     expect(main(w)).toBe('12')
+    expect(cima(w)).toBe('12')
   })
 
   it('evaluates a scientific function (√)', async () => {
@@ -147,31 +150,106 @@ describe('Calculadora', () => {
   it('memory add then recall', async () => {
     const w = mountCalc()
     await click(w, '5')
+    expect(anunciador(w, 'M').classes()).not.toContain('is-on')
     await click(w, 'M+')
     expect(w.vm.mem).toBe(5)
+    expect(anunciador(w, 'M').classes()).toContain('is-on')
     await click(w, 'AC')
     await click(w, 'MR')
     expect(main(w)).toBe('5')
   })
 
   it('toggles scientific mode', async () => {
+    // Liga com o bloco científico à mostra, como uma calculadora de engenharia; a chave SCI
+    // do painel deixa só o teclado básico, e DEG e RAD só acendem com ele.
     const w = mountCalc()
-    expect(w.vm.sci).toBe(false)
-    await click(w, 'SCI')
     expect(w.vm.sci).toBe(true)
+    expect(w.find('.ros-calc__device').classes()).toContain('ros-calc__device--sci')
+    expect(anunciador(w, 'DEG').classes()).toContain('is-on')
+    await click(w, 'SCI')
+    expect(w.vm.sci).toBe(false)
+    expect(w.find('.ros-calc__device').classes()).not.toContain('ros-calc__device--sci')
+    expect(w.find('.ros-calc__switch').attributes('aria-pressed')).toBe('false')
+    expect(anunciador(w, 'DEG').classes()).not.toContain('is-on')
   })
 
-  it('grows the LCD length class as the number gets longer', async () => {
+  it('shows the expression on the dot-matrix line and the value on the digit line', async () => {
     const w = mountCalc()
-    expect(w.find('.ros-calc__main').classes()).toContain('len-1')
+    expect(cima(w)).toBe('')
+    expect(main(w)).toBe('0')
     for (let i = 0; i < 10; i++) await click(w, '9')
-    expect(w.find('.ros-calc__main').classes()).toContain('len-2')
+    expect(cima(w)).toBe('9999999999')
+    expect(main(w)).toBe('9999999999')
+    await click(w, '+')
+    await click(w, '1')
+    expect(main(w)).toBe('10000000000')
+  })
+
+  it('keeps the last preview while the expression does not close yet', async () => {
+    const w = mountCalc()
+    await click(w, '1')
+    await click(w, '+')
+    await click(w, '2')
+    expect(main(w)).toBe('3')
+    await click(w, '×')
+    await click(w, 'sin')
+    expect(cima(w)).toBe('1+2×sin(')
+    expect(main(w)).toBe('3')
+    await click(w, 'AC')
+    expect(main(w)).toBe('0')
+  })
+
+  it('continues from a negative result without losing the sign', async () => {
+    const w = mountCalc()
+    await click(w, '2')
+    await click(w, '−')
+    await click(w, '8')
+    await click(w, '=')
+    expect(main(w)).toBe('-6')
+    await click(w, '+')
+    await click(w, '1')
+    await click(w, '=')
+    expect(main(w)).toBe('-5')
+  })
+
+  it('2nd lights its annunciator and the amber legends; the key keeps its name', async () => {
+    const w = mountCalc()
+    await click(w, '2nd')
+    expect(anunciador(w, '2nd').classes()).toContain('is-on')
+    expect(w.find('.ros-calc__legenda').classes()).toContain('is-on')
+    await click(w, 'sin')
+    expect(cima(w)).toBe('asin(')
+    const seno = w.findAll('button').find((b) => b.text() === 'sin')
+    expect(seno.attributes('aria-label')).toBe('asin')
+  })
+
+  it('the physical key sinks the key on the screen', async () => {
+    const w = mountCalc()
+    tecla('7')
+    await w.vm.$nextTick()
+    const sete = w.findAll('button').find((b) => b.text() === '7')
+    expect(sete.classes()).toContain('is-apertada')
+    await new Promise((r) => setTimeout(r, 200))
+    expect(sete.classes()).not.toContain('is-apertada')
+  })
+
+  it('shows the focus ring only to whoever navigates with Tab', async () => {
+    const w = mountCalc()
+    await w.find('.ros-calc').trigger('keydown', { key: 'Tab' })
+    expect(w.find('.ros-calc').classes()).toContain('is-tab')
+    await w.find('.ros-calc').trigger('pointerdown')
+    expect(w.find('.ros-calc').classes()).not.toContain('is-tab')
+  })
+
+  it('takes the light profile from the system, not from the document', () => {
+    expect(mountCalc().find('.ros-calc').classes()).not.toContain('is-leve')
+    expect(mountCalc({ modoLeve: true }).find('.ros-calc').classes()).toContain('is-leve')
   })
 
   it('shows the texts it received, and the history button has its label', async () => {
     const w = mountCalc()
     expect(w.find('.ros-calc__footer').text()).toContain('powered by')
-    const historico = w.findAll('.ros-calc__chip')[1]
+    const historico = w.find('.key--hist')
     expect(historico.attributes('aria-label')).toBe('Histórico')
     expect(historico.find('svg path').attributes('d')).toMatch(/^M13 3a9 9/)
     await historico.trigger('click')
@@ -182,7 +260,7 @@ describe('Calculadora', () => {
 
   it('without texts yet, shows no label instead of the raw key', () => {
     const w = mountCalc({ textos: null })
-    expect(w.findAll('.ros-calc__chip')[1].attributes('aria-label')).toBe('')
+    expect(w.find('.key--hist').attributes('aria-label')).toBe('')
     w.unmount()
   })
 

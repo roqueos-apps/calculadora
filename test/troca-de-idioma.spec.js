@@ -20,7 +20,7 @@ vi.mock('../src/textos.js', async (original) => {
 
 import calculadora from '../src/index.js'
 
-const rotulo = (el) => el.querySelectorAll('.ros-calc__chip')[1]?.getAttribute('aria-label')
+const rotulo = (el) => el.querySelector('.key--hist')?.getAttribute('aria-label')
 
 describe('a Calculadora troca de idioma fora de ordem', () => {
   it('vale o último idioma pedido, mesmo que a resposta dele chegue antes', async () => {

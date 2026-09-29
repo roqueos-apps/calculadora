@@ -1,0 +1,137 @@
+// O visor: cristal líquido verde-acinzentado embutido numa moldura preta, com a borda de
+// alumínio do painel em volta. A tinta é um preto esverdeado; o que está apagado continua
+// visível, fraco ("fantasma"), como num LCD de verdade. O vidro reflete a luz pela
+// inclinação (--tilt-x e --tilt-y, herdadas da carcaça). Medidas em cqw da carcaça.
+
+.ros-calc__lcd {
+  --calc-lcd-1: #c6ceb3;
+  --calc-lcd-2: #b1bb9d;
+  --calc-lcd-3: #a3ad8f;
+  --calc-lcd-tinta: #182011;
+  --calc-lcd-fantasma: 0.065;
+  --calc-lcd-fantasma-da-matriz: 0.035;
+  --calc-lcd-moldura: #121316;
+  --calc-lcd-aro: rgba(255, 255, 255, 0.55);
+  --calc-lcd-sombra: rgba(0, 0, 0, 0.42);
+  --calc-lcd-vidro: rgba(255, 255, 255, 0.26);
+  --calc-lcd-vidro-0: rgba(255, 255, 255, 0);
+  position: relative;
+  margin: 3.6cqw 1.4cqw 0;
+  padding: 1.6cqw 2.6cqw 2.2cqw;
+  border-radius: 1.4cqw;
+  background: linear-gradient(
+    180deg,
+    var(--calc-lcd-1) 0%,
+    var(--calc-lcd-2) 62%,
+    var(--calc-lcd-3) 100%
+  );
+  box-shadow:
+    inset 0 0.8cqw 1.4cqw var(--calc-lcd-sombra),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.25),
+    0 0 0 1.5cqw var(--calc-lcd-moldura),
+    0 0 0 1.5cqw var(--calc-lcd-moldura),
+    0 0 0 1.85cqw var(--calc-lcd-aro);
+  color: var(--calc-lcd-tinta);
+  overflow: hidden;
+}
+
+// Os indicadores: letras pequenas, fixas no vidro, acesas ou fantasma.
+.lcd__anunciadores {
+  display: flex;
+  align-items: center;
+  gap: 2.2cqw;
+  height: 2.8cqw;
+  font-size: 2.3cqw;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  line-height: 1;
+}
+.lcd__anunc {
+  opacity: var(--calc-lcd-fantasma);
+  &.is-on {
+    opacity: 0.92;
+  }
+}
+.lcd__anunc--seta {
+  font-size: 2cqw;
+}
+.lcd__espaco {
+  flex: 1;
+}
+
+.ros-calc__expr {
+  position: relative;
+  height: 6.4cqw;
+  margin-top: 1.4cqw;
+}
+.ros-calc__main {
+  position: relative;
+  height: 11.6cqw;
+  margin-top: 2.2cqw;
+}
+.lcd__matriz,
+.lcd__digitos {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.lcd__tinta {
+  fill: var(--calc-lcd-tinta);
+}
+.lcd__fantasma {
+  fill: var(--calc-lcd-tinta);
+  opacity: var(--calc-lcd-fantasma);
+}
+.lcd__matriz .lcd__fantasma {
+  opacity: var(--calc-lcd-fantasma-da-matriz);
+}
+// O cursor pisca como no LCD: aceso, apagado, sem transição.
+.lcd__cursor {
+  animation: lcd-cursor 1.06s steps(1, end) infinite;
+}
+@keyframes lcd-cursor {
+  50% {
+    opacity: 0;
+  }
+}
+
+// O texto de verdade: fora da vista, dentro da árvore de acessibilidade.
+.lcd__texto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+// O vidro: um reflexo largo que anda com a inclinação.
+.lcd__vidro {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    112deg,
+    var(--calc-lcd-vidro-0) calc(18% + var(--tilt-x, 0) * 14%),
+    var(--calc-lcd-vidro) calc(30% + var(--tilt-x, 0) * 14%),
+    var(--calc-lcd-vidro-0) calc(48% + var(--tilt-x, 0) * 14%)
+  );
+  mix-blend-mode: soft-light;
+}
+
+.ros-calc.is-leve .lcd__vidro {
+  display: none;
+}
+.ros-calc.is-leve .lcd__cursor {
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .lcd__cursor {
+    animation: none;
+  }
+}
