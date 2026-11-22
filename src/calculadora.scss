@@ -8,9 +8,10 @@
 // e nunca deforma. O tamanho da carcaça sai da janela (`.ros-calc` é contêiner de tamanho).
 //
 // As cores são do app, em variáveis --calc-*: o prefixo --ros- é do sistema, e o `app check`
-// reprova o app que declara uma delas. A calculadora não lê cor do tema do RoqueOS: é um
-// objeto, e fica igual no tema claro e no escuro (a mesa em volta dela também). O visor tem
-// o estilo dele em visor.scss.
+// reprova o app que declara uma delas. A calculadora é um objeto: a carcaça, as teclas, o
+// visor e a gaveta do histórico ficam iguais no tema claro e no escuro. Só a mesa em volta
+// dela e o rodapé que fica em cima da mesa seguem o tema (veja o bloco @supports da mesa). O
+// visor tem o estilo dele em visor.scss.
 
 .ros-calc {
   --calc-corpo-1: #3b3f46;
@@ -23,8 +24,9 @@
   --calc-sombra-perto: rgba(0, 0, 0, 0.55);
   --calc-sombra-longe: rgba(0, 0, 0, 0.7);
   --calc-furo-fundo: rgba(0, 0, 0, 0.85);
-  --calc-rodape: rgba(255, 255, 255, 0.3);
-  --calc-rodape-marca: rgba(255, 255, 255, 0.6);
+  // O rodapé fica em cima da mesa, e não da carcaça: opaco e com 4,5:1 contra ela.
+  --calc-rodape: #9aa0a9;
+  --calc-rodape-marca: #d5d9de;
 
   // Box model próprio: o app não herda o `box-sizing: border-box` global do RoqueOS, e sem
   // isto o padding soma à largura e a carcaça sai cortada no `yarn dev` (27/09/2026).
@@ -110,6 +112,35 @@
   --calc-gaveta-realce: rgba(255, 255, 255, 0.06);
   --calc-gaveta-borda: rgba(255, 255, 255, 0.14);
   --calc-gaveta-rolagem: rgba(255, 255, 255, 0.15);
+}
+
+// ---------------- a mesa segue o tema ----------------
+// A mesa e o rodapé acompanham o tema do RoqueOS pelo texto principal do contrato
+// (`--ros-text-100`, o único do app-sdk 0.1.0 que vira com o tema): branco no escuro, preto
+// no claro. Cada canal vai da cor clara (texto preto, r = 0) à escura de sempre (texto
+// branco, r = 255), então o escuro fica idêntico ao de antes e o claro é uma mesa clara com
+// a calculadora escura em cima. Sem o sistema (fora do RoqueOS) vale o branco, e a mesa é a
+// escura. O @supports guarda o navegador sem cor relativa: lá, a declaração com `from`
+// seria inválida e apagaria a mesa, então ele fica com as cores escuras de cima.
+@supports (color: rgb(from red r g b)) {
+  .ros-calc {
+    --calc-mesa-1: rgb(
+      from var(--ros-text-100, #fff) calc(230 + (28 - 230) * r / 255)
+        calc(232 + (31 - 232) * r / 255) calc(235 + (36 - 235) * r / 255)
+    );
+    --calc-mesa-2: rgb(
+      from var(--ros-text-100, #fff) calc(201 + (15 - 201) * r / 255)
+        calc(205 + (17 - 205) * r / 255) calc(211 + (20 - 211) * r / 255)
+    );
+    --calc-rodape: rgb(
+      from var(--ros-text-100, #fff) calc(74 + (154 - 74) * r / 255) calc(79 + (160 - 79) * r / 255)
+        calc(87 + (169 - 87) * r / 255)
+    );
+    --calc-rodape-marca: rgb(
+      from var(--ros-text-100, #fff) calc(35 + (213 - 35) * r / 255) calc(38 + (217 - 38) * r / 255)
+        calc(43 + (222 - 43) * r / 255)
+    );
+  }
 }
 
 // ---------------- footer (brand stamp, sits in the safe-area space) ----------

@@ -82,9 +82,10 @@ Só pelo `sistema` do SDK:
   nem o cursor piscando;
 - `ativar(ativo)` da montagem: o teclado físico só vale com a janela ativa.
 
-Ela não grava nada, não fala com servidor nem com banco, e não pede capacidade opcional. Não
-lê cor do tema do RoqueOS: é um objeto, igual no tema claro e no escuro, e as cores dela são
-`--calc-*`, dela.
+Ela não grava nada, não fala com servidor nem com banco, e não pede capacidade opcional. A
+calculadora é um objeto, igual no tema claro e no escuro, e as cores dela são `--calc-*`,
+dela. Só a mesa em volta e o rodapé seguem o tema, pelo `--ros-text-100` do contrato: mesa
+clara no tema claro, escura no escuro.
 
 ## Pré-requisitos
 
@@ -142,8 +143,9 @@ move to its own open repository under MIT, in the
 [roqueos-apps](https://github.com/roqueos-apps) organization. RoqueOS installs it by tag as a
 git dependency, and it talks to RoqueOS only through the `sistema` of
 [`@roqueos-apps/app-sdk`](https://github.com/roqueos-apps/app-sdk) (language, light profile,
-active window). It stores nothing, calls no server or database, and reads no color from the
-RoqueOS theme.
+active window). It stores nothing and calls no server or database. The calculator itself
+looks the same in both themes; only the desk around it and the footer follow the RoqueOS
+theme, through the contract's `--ros-text-100`.
 
 Run `yarn install --ignore-scripts`, then `yarn dev` to open it in a fake RoqueOS window with
 a language picker, or `yarn verificar` to run what CI runs. Every commit must be signed off

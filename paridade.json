@@ -378,9 +378,10 @@
       "o_que": "Rodapé \"powered by LEVELHARD\"",
       "estado": "mantida",
       "testes": [
-        "test/Calculadora.spec.js › shows the texts it received, and the history button has its label"
+        "test/Calculadora.spec.js › shows the texts it received, and the history button has its label",
+        "test/mesa.spec.js › keeps the footer text at 4.5:1 or more over the desk in both themes"
       ],
-      "evidencia": "O .ros-calc__footer e o brand, em src/Calculadora.vue. Na 0.2.0 a cor é --calc-rodape (branco a 30%): antes era rgba(var(--ros-white-rgb), ...), e fora do RoqueOS, onde a variável não existe, o rodapé saía escuro sobre o fundo escuro. O teste confere \"powered by\"; a marca LEVELHARD não tem teste."
+      "evidencia": "O .ros-calc__footer e o brand, em src/Calculadora.vue. Na 0.2.0 a cor era --calc-rodape (branco a 30%): antes era rgba(var(--ros-white-rgb), ...), e fora do RoqueOS, onde a variável não existe, o rodapé saía escuro sobre o fundo escuro. Na 0.2.1 o rodapé é opaco, segue o tema junto com a mesa e passa de 4,5:1 contra ela no claro e no escuro. O teste confere \"powered by\" e o contraste; a marca LEVELHARD não tem teste."
     },
     {
       "o_que": "As cores da Calculadora ao alcance de um tema, como custom property (62 antes, 78 na 0.2.0)",
