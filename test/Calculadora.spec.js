@@ -284,4 +284,14 @@ describe('Calculadora', () => {
     w.unmount()
     expect(() => tecla('7')).not.toThrow()
   })
+
+  // axe label-content-name-mismatch (26/11/2026): a tecla mostra DRG e o nome dizia só DEG
+  // ou RAD. Quem usa comando de voz fala o que vê; o nome agora começa pelo texto da tecla.
+  it('the DRG key name starts with its visible text and says the current mode', async () => {
+    const w = mountCalc()
+    const drg = () => w.findAll('button').find((b) => b.text().trim() === 'DRG')
+    expect(drg().attributes('aria-label')).toBe('DRG, DEG')
+    await click(w, 'DRG')
+    expect(drg().attributes('aria-label')).toBe('DRG, RAD')
+  })
 })
