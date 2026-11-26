@@ -3,6 +3,16 @@
 O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/), e o projeto
 usa [versionamento semântico](https://semver.org/lang/pt-BR/).
 
+## [Não lançado]
+
+### Documentação
+
+- A documentação no padrão da família: `docs/` em inglês (o principal) e o par em `docs/pt-BR/`,
+  declarados em `docs/docs.json` e conferidos pelo `roqueos-docs`. Começar, arquitetura,
+  referência, operação, quando quebra, glossário, integrações, testes e decisões. O `README.md` e
+  o `CONTRIBUTING.md` passam a ser em inglês, com o par em `README.pt-BR.md` e
+  `docs/pt-BR/CONTRIBUTING.md`. Nenhum código mudou.
+
 ## [0.2.1] - 2026-11-22
 
 ### Mudado
