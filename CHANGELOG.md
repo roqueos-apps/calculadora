@@ -13,6 +13,17 @@ usa [versionamento semântico](https://semver.org/lang/pt-BR/).
   o `CONTRIBUTING.md` passam a ser em inglês, com o par em `README.pt-BR.md` e
   `docs/pt-BR/CONTRIBUTING.md`. Nenhum código mudou.
 
+## [0.2.1] - 2026-11-22
+
+### Mudado
+
+- A mesa em volta da calculadora segue o tema do RoqueOS: no claro é uma mesa clara com a
+  calculadora escura em cima, no escuro fica idêntica à de antes. O tema chega pelo
+  `--ros-text-100`, variável do contrato do `app-sdk` 0.1.0, sem subir a versão do SDK. A
+  carcaça, as teclas, o visor e a gaveta do histórico não mudam: são o objeto.
+- O rodapé "powered by", que fica em cima da mesa, segue o tema junto e passa de 4,5:1 contra
+  ela nos dois temas. Antes era branco a 30% sobre a mesa escura (perto de 2,8:1).
+
 ## [0.2.0] - 2026-09-28
 
 O visual de uma calculadora de engenharia dos anos 2000, a pedido do founder ("deixe ela

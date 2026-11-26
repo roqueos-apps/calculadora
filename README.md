@@ -58,8 +58,9 @@ How the parts fit together, with diagrams, is in [docs/ARCHITECTURE.md](docs/ARC
 Version 0.2.0 (28/09/2026) is the one RoqueOS pins today (`roqueos-front/package.json`,
 `github:roqueos-apps/calculadora#v0.2.0`). The app stores nothing: history (up to 60 entries)
 and memory live only while the window is open. It does not talk to a server or a database, asks
-for no optional capability, and reads no color from the RoqueOS theme. There is no copy and
-paste. Nothing was measured on a real iPhone or Android device; the tilt on those is covered by
+for no optional capability. The calculator itself looks the same in light and dark; only the
+desk around it and the footer follow the RoqueOS theme, through the contract's `--ros-text-100`.
+There is no copy and paste. Nothing was measured on a real iPhone or Android device; the tilt on those is covered by
 tests with a simulated sensor only. The rest of the known limits is in
 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#9-known-limits).
 

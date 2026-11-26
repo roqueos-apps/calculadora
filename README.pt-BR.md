@@ -59,7 +59,8 @@ Como as partes se encaixam, com diagramas, está em
 A versão 0.2.0 (28/09/2026) é a que o RoqueOS pina hoje (`roqueos-front/package.json`,
 `github:roqueos-apps/calculadora#v0.2.0`). O app não grava nada: o histórico (até 60 contas) e a
 memória só vivem enquanto a janela está aberta. Não fala com servidor nem com banco, não pede
-capacidade opcional e não lê cor do tema do RoqueOS. Não tem copiar e colar. Nada foi medido num
+capacidade opcional. A calculadora fica igual no tema claro e no escuro; só a mesa em volta e
+o rodapé seguem o tema do RoqueOS, pelo `--ros-text-100` do contrato. Não tem copiar e colar. Nada foi medido num
 iPhone nem num Android de verdade; a inclinação neles só está coberta por teste com sensor
 simulado. O resto dos limites conhecidos está em
 [docs/pt-BR/ARQUITETURA.md](docs/pt-BR/ARQUITETURA.md#9-limites-conhecidos).
