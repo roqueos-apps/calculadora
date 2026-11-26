@@ -127,7 +127,7 @@
               <button
                 class="ros-calc__key key--fn"
                 type="button"
-                :aria-label="deg ? 'DEG' : 'RAD'"
+                :aria-label="`DRG, ${deg ? 'DEG' : 'RAD'}`"
                 @click="toggleDeg"
               >
                 DRG

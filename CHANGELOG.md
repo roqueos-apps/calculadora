@@ -3,7 +3,11 @@
 O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/), e o projeto
 usa [versionamento semântico](https://semver.org/lang/pt-BR/).
 
-## [Não lançado]
+## 0.2.2 (26/11/2026)
+
+### Acessibilidade
+
+- A tecla DRG passa a ter o nome que começa pelo texto dela ("DRG, DEG" ou "DRG, RAD"): quem usa comando de voz fala o que vê na tecla (axe `label-content-name-mismatch`).
 
 ### Documentação
 
